@@ -15,11 +15,14 @@ import { Route as ContactRouteImport } from './routes/contact'
 import { Route as DisclaimerRouteImport } from './routes/disclaimer'
 import { Route as GameRouteImport } from './routes/game'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as CarsIndexRouteImport } from './routes/cars.index'
 import { Route as CarsVolterraGtOneRouteImport } from './routes/cars.volterra-gt-one'
 import { Route as NewsIndexRouteImport } from './routes/news.index'
 import { Route as NewsSlugRouteImport } from './routes/news.$slug'
+import { Route as OwnerIndexRouteImport } from './routes/owner.index'
+import { Route as OwnerLoginRouteImport } from './routes/owner.login'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -51,6 +54,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
   path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
@@ -76,6 +84,16 @@ const NewsSlugRoute = NewsSlugRouteImport.update({
   path: '/news/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OwnerIndexRoute = OwnerIndexRouteImport.update({
+  id: '/owner/',
+  path: '/owner/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OwnerLoginRoute = OwnerLoginRouteImport.update({
+  id: '/owner/login',
+  path: '/owner/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -84,11 +102,14 @@ export interface FileRoutesByFullPath {
   '/disclaimer': typeof DisclaimerRoute
   '/game': typeof GameRoute
   '/privacy': typeof PrivacyRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/terms': typeof TermsRoute
   '/cars/volterra-gt-one': typeof CarsVolterraGtOneRoute
   '/news/$slug': typeof NewsSlugRoute
+  '/owner/login': typeof OwnerLoginRoute
   '/cars/': typeof CarsIndexRoute
   '/news/': typeof NewsIndexRoute
+  '/owner/': typeof OwnerIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -97,11 +118,14 @@ export interface FileRoutesByTo {
   '/disclaimer': typeof DisclaimerRoute
   '/game': typeof GameRoute
   '/privacy': typeof PrivacyRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/terms': typeof TermsRoute
   '/cars/volterra-gt-one': typeof CarsVolterraGtOneRoute
   '/news/$slug': typeof NewsSlugRoute
+  '/owner/login': typeof OwnerLoginRoute
   '/cars': typeof CarsIndexRoute
   '/news': typeof NewsIndexRoute
+  '/owner': typeof OwnerIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -111,11 +135,14 @@ export interface FileRoutesById {
   '/disclaimer': typeof DisclaimerRoute
   '/game': typeof GameRoute
   '/privacy': typeof PrivacyRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/terms': typeof TermsRoute
   '/cars/volterra-gt-one': typeof CarsVolterraGtOneRoute
   '/news/$slug': typeof NewsSlugRoute
+  '/owner/login': typeof OwnerLoginRoute
   '/cars/': typeof CarsIndexRoute
   '/news/': typeof NewsIndexRoute
+  '/owner/': typeof OwnerIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -126,11 +153,14 @@ export interface FileRouteTypes {
     | '/disclaimer'
     | '/game'
     | '/privacy'
+    | '/reset-password'
     | '/terms'
     | '/cars/volterra-gt-one'
     | '/news/$slug'
+    | '/owner/login'
     | '/cars/'
     | '/news/'
+    | '/owner/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -139,11 +169,14 @@ export interface FileRouteTypes {
     | '/disclaimer'
     | '/game'
     | '/privacy'
+    | '/reset-password'
     | '/terms'
     | '/cars/volterra-gt-one'
     | '/news/$slug'
+    | '/owner/login'
     | '/cars'
     | '/news'
+    | '/owner'
   id:
     | '__root__'
     | '/'
@@ -152,11 +185,14 @@ export interface FileRouteTypes {
     | '/disclaimer'
     | '/game'
     | '/privacy'
+    | '/reset-password'
     | '/terms'
     | '/cars/volterra-gt-one'
     | '/news/$slug'
+    | '/owner/login'
     | '/cars/'
     | '/news/'
+    | '/owner/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -166,11 +202,14 @@ export interface RootRouteChildren {
   DisclaimerRoute: typeof DisclaimerRoute
   GameRoute: typeof GameRoute
   PrivacyRoute: typeof PrivacyRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   TermsRoute: typeof TermsRoute
   CarsVolterraGtOneRoute: typeof CarsVolterraGtOneRoute
   NewsSlugRoute: typeof NewsSlugRoute
+  OwnerLoginRoute: typeof OwnerLoginRoute
   CarsIndexRoute: typeof CarsIndexRoute
   NewsIndexRoute: typeof NewsIndexRoute
+  OwnerIndexRoute: typeof OwnerIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -217,6 +256,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/terms': {
       id: '/terms'
       path: '/terms'
@@ -252,6 +298,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NewsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/owner/': {
+      id: '/owner/'
+      path: '/owner'
+      fullPath: '/owner/'
+      preLoaderRoute: typeof OwnerIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/owner/login': {
+      id: '/owner/login'
+      path: '/owner/login'
+      fullPath: '/owner/login'
+      preLoaderRoute: typeof OwnerLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -262,11 +322,14 @@ const rootRouteChildren: RootRouteChildren = {
   DisclaimerRoute: DisclaimerRoute,
   GameRoute: GameRoute,
   PrivacyRoute: PrivacyRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   TermsRoute: TermsRoute,
   CarsVolterraGtOneRoute: CarsVolterraGtOneRoute,
   NewsSlugRoute: NewsSlugRoute,
+  OwnerLoginRoute: OwnerLoginRoute,
   CarsIndexRoute: CarsIndexRoute,
   NewsIndexRoute: NewsIndexRoute,
+  OwnerIndexRoute: OwnerIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
