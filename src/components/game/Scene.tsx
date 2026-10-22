@@ -189,8 +189,7 @@ export function Scene({ cockpit }: { cockpit: boolean }) {
 
     // Road scroll: texture moves toward camera (bottom of screen)
     const idleSpeed = playing ? s.speed : useGameStore.getState().state === "menu" ? 10 : 0;
-    if (!playing) s.distance += idleSpeed * dt * 0; // menu shows scroll via offset only
-    roadTex.offset.y += (idleSpeed * dt) / (300 / 30) * 1;
+    roadTex.offset.y += (idleSpeed * dt) / 10; // one texture tile = 10 m
 
     // Scenery wrap
     if (scenery.current) {
@@ -215,12 +214,13 @@ export function Scene({ cockpit }: { cockpit: boolean }) {
           car.visible = o.kind === "car";
           cell.visible = o.kind === "cell";
           if (o.kind === "car") {
-            const body = car.children[0]?.children[0] as THREE.Mesh | undefined;
-            const mat = body?.material as THREE.MeshStandardMaterial | undefined;
-            if (mat && mat.userData.forId !== o.id) {
-              mat.color.set(o.color);
-              mat.userData.forId = o.id;
-            }
+            car.traverse((c) => {
+              const mat = (c as THREE.Mesh).material as THREE.MeshStandardMaterial | undefined;
+              if (mat && mat.userData?.body && mat.userData.forId !== o.id) {
+                mat.color.set(o.color);
+                mat.userData.forId = o.id;
+              }
+            });
           } else {
             cell.rotation.y += dt * 3;
             cell.position.y = 0.9 + Math.sin(performance.now() / 250) * 0.15;
@@ -326,7 +326,11 @@ export function Scene({ cockpit }: { cockpit: boolean }) {
 
 /** Each traffic car gets its own body material so colors can differ. */
 function TrafficCar() {
-  const mat = useMemo(() => new THREE.MeshStandardMaterial({ color: "#e0e0e0", metalness: 0.5, roughness: 0.35 }), []);
+  const mat = useMemo(() => {
+    const m = new THREE.MeshStandardMaterial({ color: "#e0e0e0", metalness: 0.5, roughness: 0.35 });
+    m.userData.body = true;
+    return m;
+  }, []);
   return (
     <group>
       <group>
