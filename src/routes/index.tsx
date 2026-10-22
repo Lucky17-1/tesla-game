@@ -1,4 +1,6 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, ClientOnly } from "@tanstack/react-router";
+import { lazy, Suspense } from "react";
+const CarViewer = lazy(() => import("@/components/three/CarViewer"));
 import { articles } from "@/data/articles";
 import { ArticleCard } from "@/components/ArticleCard";
 import { CONCEPT_CAR } from "@/data/car";
@@ -131,6 +133,17 @@ function HomePage() {
             </Link>
           </div>
         </div>
+      </section>
+
+      {/* 3D viewer */}
+      <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+        <h2 className="font-display text-3xl font-bold">Explore it in 3D</h2>
+        <p className="mt-1 mb-4 text-sm text-muted-foreground">Switch between the exterior and the cockpit. Drag to look around.</p>
+        <ClientOnly fallback={<div className="aspect-video w-full rounded-xl border border-border bg-card" />}>
+          <Suspense fallback={<div className="aspect-video w-full rounded-xl border border-border bg-card" />}>
+            <CarViewer />
+          </Suspense>
+        </ClientOnly>
       </section>
 
       {/* Latest news */}
