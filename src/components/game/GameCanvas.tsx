@@ -6,11 +6,11 @@ import { touchInput } from "@/game/input";
 import { audio } from "@/game/audio";
 
 class GameErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
-  state = { failed: false };
+  override state = { failed: false };
   static getDerivedStateFromError() {
     return { failed: true };
   }
-  render() {
+  override render() {
     return this.state.failed ? <Fallback text="The game hit an error. Please reload the page." /> : this.props.children;
   }
 }

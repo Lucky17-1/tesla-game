@@ -52,7 +52,7 @@ export const CarModel = forwardRef<THREE.Group, { color?: string; showInterior?:
           [0.95, -1.45],
           [-0.95, 1.45],
           [0.95, 1.45],
-        ].map(([x, z], i) => (
+        ].map(([x = 0, z = 0], i) => (
           <mesh key={i} position={[x, 0.36, z]} rotation-z={Math.PI / 2} castShadow>
             <cylinderGeometry args={[0.36, 0.36, 0.28, 20]} />
             <meshStandardMaterial color="#151515" roughness={0.8} />
