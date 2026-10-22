@@ -159,7 +159,7 @@ class AudioManager {
       gain.gain.setValueAtTime(0.12, t + i * 0.05);
       gain.gain.exponentialRampToValueAtTime(0.001, t + i * 0.05 + 0.12);
       osc.connect(gain);
-      gain.connect(this.master);
+      if (this.master) gain.connect(this.master);
       osc.start(t + i * 0.05);
       osc.stop(t + i * 0.05 + 0.14);
     });
@@ -217,7 +217,7 @@ class AudioManager {
       gain.gain.setValueAtTime(0.15, t + i * 0.16);
       gain.gain.exponentialRampToValueAtTime(0.001, t + i * 0.16 + 0.3);
       osc.connect(gain);
-      gain.connect(this.master);
+      if (this.master) gain.connect(this.master);
       osc.start(t + i * 0.16);
       osc.stop(t + i * 0.16 + 0.32);
     });
