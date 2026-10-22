@@ -134,16 +134,16 @@ export function Scene({ cockpit }: { cockpit: boolean }) {
       // Spawning traffic
       s.nextSpawn -= s.speed * dt;
       if (s.nextSpawn <= 0) {
-        const lane = LANES[Math.floor(Math.random() * LANES.length)];
+        const lane = LANES[Math.floor(Math.random() * LANES.length)]!;
         s.objs.push({
           id: s.nextId++, kind: "car", x: lane, z: SPAWN_Z, speed: 8 + Math.random() * 8,
-          passed: false, alive: true, color: TRAFFIC_COLORS[Math.floor(Math.random() * TRAFFIC_COLORS.length)],
+          passed: false, alive: true, color: TRAFFIC_COLORS[Math.floor(Math.random() * TRAFFIC_COLORS.length)]!,
         });
         s.nextSpawn = THREE.MathUtils.lerp(55, 22, difficulty) + Math.random() * 20;
       }
       s.nextCell -= s.speed * dt;
       if (s.nextCell <= 0) {
-        const lane = LANES[Math.floor(Math.random() * LANES.length)];
+        const lane = LANES[Math.floor(Math.random() * LANES.length)]!;
         s.objs.push({ id: s.nextId++, kind: "cell", x: lane, z: SPAWN_Z, speed: 0, passed: false, alive: true, color: "" });
         s.nextCell = 70 + Math.random() * 60;
       }
@@ -209,16 +209,16 @@ export function Scene({ cockpit }: { cockpit: boolean }) {
         if (o) {
           mesh.visible = true;
           mesh.position.set(o.x, 0, o.z);
-          const car = mesh.children[0];
-          const cell = mesh.children[1];
+          const car = mesh.children[0]!;
+          const cell = mesh.children[1]!;
           car.visible = o.kind === "car";
           cell.visible = o.kind === "cell";
           if (o.kind === "car") {
             car.traverse((c) => {
               const mat = (c as THREE.Mesh).material as THREE.MeshStandardMaterial | undefined;
-              if (mat && mat.userData?.body && mat.userData.forId !== o.id) {
+              if (mat && mat.userData?.['body'] && mat.userData['forId'] !== o.id) {
                 mat.color.set(o.color);
-                mat.userData.forId = o.id;
+                mat.userData['forId'] = o.id;
               }
             });
           } else {
@@ -328,7 +328,7 @@ export function Scene({ cockpit }: { cockpit: boolean }) {
 function TrafficCar() {
   const mat = useMemo(() => {
     const m = new THREE.MeshStandardMaterial({ color: "#e0e0e0", metalness: 0.5, roughness: 0.35 });
-    m.userData.body = true;
+    m.userData['body'] = true;
     return m;
   }, []);
   return (
@@ -346,7 +346,7 @@ function TrafficCar() {
         <boxGeometry args={[1.6, 0.1, 0.03]} />
         <meshStandardMaterial color="#ff2020" emissive="#ff1010" emissiveIntensity={1.8} />
       </mesh>
-      {[[-0.92, -1.3], [0.92, -1.3], [-0.92, 1.3], [0.92, 1.3]].map(([x, z], i) => (
+      {[[-0.92, -1.3], [0.92, -1.3], [-0.92, 1.3], [0.92, 1.3]].map(([x = 0, z = 0], i) => (
         <mesh key={i} position={[x, 0.34, z]} rotation-z={Math.PI / 2}>
           <cylinderGeometry args={[0.34, 0.34, 0.26, 14]} />
           <meshStandardMaterial color="#151515" />
