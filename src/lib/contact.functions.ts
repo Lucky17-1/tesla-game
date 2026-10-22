@@ -21,10 +21,11 @@ async function sha256(text: string) {
  * message. Email notification is added once a sender domain is verified.
  */
 export const submitContact = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => contactSchema.parse(input))
+  .validator((input: unknown) => contactSchema.parse(input))
   .handler(async ({ data }) => {
     // Bots: filled honeypot or submitted faster than a human could type.
     if (data.website || Date.now() - data.startedAt < 3000) {
+      console.warn("contact: dropped as spam", { honeypot: !!data.website, ms: Date.now() - data.startedAt });
       return { ok: true as const }; // silently drop
     }
     const ip = getRequestHeader("cf-connecting-ip") ?? getRequestHeader("x-forwarded-for") ?? "unknown";
