@@ -23,6 +23,7 @@ export function Footer() {
             <li><Link to="/" className="hover:text-primary transition-colors">Home</Link></li>
             <li><Link to="/cars" className="hover:text-primary transition-colors">Cars</Link></li>
             <li><Link to="/news" className="hover:text-primary transition-colors">News</Link></li>
+            <li><Link to="/owner/login" className="hover:text-primary transition-colors">Owner</Link></li>
             <li><Link to="/game" className="hover:text-primary transition-colors">Racing game</Link></li>
           </ul>
         </nav>

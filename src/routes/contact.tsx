@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { submitContact } from "@/lib/contact.functions";
 import { SITE } from "@/config/site";
 
 export const Route = createFileRoute("/contact")({
@@ -17,7 +19,7 @@ export const Route = createFileRoute("/contact")({
   component: ContactPage,
 });
 
-type Status = "idle" | "sent" | "error";
+type Status = "idle" | "sending" | "sent" | "error" | "failed";
 
 interface FormState {
   name: string;
@@ -55,7 +57,12 @@ function ContactPage() {
     setStatus("idle");
   };
 
-  const onSubmit = (e: FormEvent) => {
+  const send = useServerFn(submitContact);
+  const startedAt = useRef(Date.now());
+  const [honeypot, setHoneypot] = useState("");
+  const [failMsg, setFailMsg] = useState("");
+
+  const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const found = validate(form);
     setErrors(found);
@@ -63,19 +70,22 @@ function ContactPage() {
       setStatus("error");
       return;
     }
-    // No backend is configured: compose the message in the visitor's own
-    // email app instead of pretending to send it from a server.
-    const body = [
-      `Name: ${form.name.trim()}`,
-      `Email: ${form.email.trim()}`,
-      "",
-      form.message.trim(),
-    ].join("\n");
-    const mailto = `mailto:${SITE.contactEmail}?subject=${encodeURIComponent(
-      `[${SITE.name}] ${form.subject}`
-    )}&body=${encodeURIComponent(body)}`;
-    window.location.href = mailto;
-    setStatus("sent");
+    setStatus("sending");
+    try {
+      const res = await send({
+        data: { ...form, name: form.name.trim(), email: form.email.trim(), message: form.message.trim(), website: honeypot, startedAt: startedAt.current },
+      });
+      if (res.ok) {
+        setStatus("sent");
+        setForm({ name: "", email: "", subject: "General", message: "" });
+      } else {
+        setFailMsg(res.error);
+        setStatus("failed");
+      }
+    } catch {
+      setFailMsg("Something went wrong sending your message. Please check your details and try again.");
+      setStatus("failed");
+    }
   };
 
   const inputClass = (hasError: boolean) =>
@@ -95,12 +105,14 @@ function ContactPage() {
           role="status"
           className="mt-6 rounded-xl border border-primary/40 bg-primary/10 p-4 text-sm"
         >
-          <p className="font-semibold text-primary">Your email app should have opened.</p>
-          <p className="mt-1 text-muted-foreground">
-            We don't run a mail server, so nothing is sent until you press send in
-            your email app. If nothing opened, write to us directly at{" "}
-            <span className="font-medium text-foreground">{SITE.contactEmail}</span>.
-          </p>
+          <p className="font-semibold text-primary">Thanks — your message was received.</p>
+          <p className="mt-1 text-muted-foreground">We'll get back to you at the email address you gave.</p>
+        </div>
+      )}
+
+      {status === "failed" && (
+        <div role="alert" className="mt-6 rounded-xl border border-destructive/50 bg-destructive/10 p-4 text-sm">
+          <p className="font-semibold text-destructive">{failMsg}</p>
         </div>
       )}
 
@@ -202,17 +214,22 @@ function ContactPage() {
           )}
         </div>
 
+        {/* Honeypot: hidden from people, bots tend to fill it */}
+        <div aria-hidden="true" style={{ position: "absolute", left: "-10000px", width: 1, height: 1, overflow: "hidden" }}>
+          <label htmlFor="contact-website">Website</label>
+          <input id="contact-website" tabIndex={-1} autoComplete="off" value={honeypot} onChange={(e) => setHoneypot(e.target.value)} />
+        </div>
+
         <button
           type="submit"
+          disabled={status === "sending"}
           className="rounded-lg bg-primary px-6 py-3 font-display font-semibold text-primary-foreground transition-all hover:bg-primary/90 hover:shadow-[0_0_28px_-6px_var(--primary)]"
         >
-          Compose email
+          {status === "sending" ? "Sending…" : "Send message"}
         </button>
 
         <p className="text-xs text-muted-foreground">
-          This form validates your input and then opens your own email app with
-          everything filled in — no message is stored on our servers. The address
-          above is a placeholder until the site owner sets a real one.
+          Your message is stored securely and only the site owner can read it.
         </p>
       </form>
     </main>

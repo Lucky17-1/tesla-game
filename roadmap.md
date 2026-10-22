@@ -37,3 +37,11 @@
 - Contact email address is a placeholder (src/config/site.ts) — replace with real address
 - AdSense publisher ID left unconfigured by design (see README)
 - No newsletter (no real email backend configured — per brief)
+
+## 5. Owner + contact (Oct 2026)
+- [x] Rebuild game scene (road scroll, traffic, cells, near-miss, cockpit C, touch)
+- [x] Homepage 3D exterior/interior viewer (temporary original model)
+- [x] Cloud: contact_messages + owner role; contact form saves via server with honeypot + rate limit
+- [x] Owner login / set password / reset + dashboard
+- [ ] Email alerts to akilking.in@gmail.com — blocked: needs a verified sender domain
+- [ ] Licensed Tesla model — blocked: needs a GLB the owner has rights to
