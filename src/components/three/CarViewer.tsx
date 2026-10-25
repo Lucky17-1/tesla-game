@@ -12,9 +12,9 @@ type View = "exterior" | "interior" | "rear";
 const VIDEO_ID = "hxMNYkLN7tI";
 
 class ViewerBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
-  state = { failed: false };
+  override state = { failed: false };
   static getDerivedStateFromError() { return { failed: true }; }
-  render() { return this.state.failed ? <div role="alert" className="flex h-full items-center justify-center bg-muted text-muted-foreground">3D view is unavailable on this device.</div> : this.props.children; }
+  override render() { return this.state.failed ? <div role="alert" className="flex h-full items-center justify-center bg-muted text-muted-foreground">3D view is unavailable on this device.</div> : this.props.children; }
 }
 
 function ViewerScene({ interior, running, doorsOpen }: { interior: boolean; running: boolean; doorsOpen: boolean }) {
