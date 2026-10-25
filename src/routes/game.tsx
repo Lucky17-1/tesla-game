@@ -8,6 +8,8 @@ export const Route = createFileRoute("/game")({
   ssr: false,
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: `VoltEdge Circuit — free browser racing game | ${SITE.name}` },
       {
         name: "description",

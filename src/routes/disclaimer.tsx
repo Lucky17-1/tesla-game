@@ -4,6 +4,8 @@ import { SITE } from "@/config/site";
 export const Route = createFileRoute("/disclaimer")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: `Disclaimer — ${SITE.name}` },
       {
         name: "description",
