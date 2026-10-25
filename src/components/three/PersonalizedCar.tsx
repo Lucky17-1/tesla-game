@@ -26,7 +26,7 @@ function Panel({ points, color, glass = false }: { points: [number, number, numb
   const geometry = useMemo(() => makePanel(points), [points]);
   useEffect(() => () => geometry.dispose(), [geometry]);
   return <mesh geometry={geometry}>
-    <meshPhysicalMaterial color={color} metalness={glass ? 0.15 : 0.65} roughness={glass ? 0.08 : 0.27} side={THREE.DoubleSide} transparent={glass} opacity={glass ? 0.28 : 1} depthWrite={!glass} clearcoat={1} />
+    <meshPhysicalMaterial color={color} metalness={glass ? 0.35 : 0.65} roughness={glass ? 0.08 : 0.27} side={THREE.DoubleSide} transparent={glass} opacity={glass ? 0.76 : 1} depthWrite={!glass} clearcoat={1} />
   </mesh>;
 }
 
@@ -69,8 +69,8 @@ function NumberPlate({ rear, palette }: { rear?: boolean; palette: Palette }) {
 
 function Wheel({ x, z, running, palette }: { x: number; z: number; running: boolean; palette: Palette }) {
   const spinning = useRef<THREE.Group>(null);
-  useFrame((_, delta) => { if (spinning.current && running) spinning.current.rotation.x -= Math.min(delta, 0.05) * 13; });
-  return <group position={[x, 0.47, z]} rotation-z={Math.PI / 2}>
+  useFrame((_, delta) => { if (spinning.current && running) spinning.current.rotation.z -= Math.min(delta, 0.05) * 13; });
+  return <group position={[x, 0.47, z]} rotation-y={Math.PI / 2}>
     <mesh castShadow><torusGeometry args={[0.355, 0.112, 14, 40]} /><meshStandardMaterial color={palette.trim} roughness={0.88} /></mesh>
     <group ref={spinning}>
       <mesh rotation-x={Math.PI / 2}><cylinderGeometry args={[0.32, 0.32, 0.24, 36]} /><meshStandardMaterial color={palette.alloy} metalness={0.85} roughness={0.3} /></mesh>
@@ -105,8 +105,10 @@ export function PersonalizedCar({ running, doorsOpen }: { running: boolean; door
     <Panel color={palette.glass} glass points={[[0.7, 1.8, 1.1], [-0.7, 1.8, 1.1], [-0.9, 1.11, 1.96], [0.9, 1.11, 1.96]]} />
     {[-1, 1].map((side) => <group key={side}>
       {/* A/B/C pillars */}
-      <mesh position={[side * 0.79, 1.47, -0.76]} rotation-x={-0.47}><boxGeometry args={[0.045, 0.76, 0.06]} /><meshStandardMaterial color={palette.trim} /></mesh>
+      <mesh position={[side * 0.79, 1.47, -0.76]} rotation-x={0.47}><boxGeometry args={[0.065, 0.76, 0.065]} /><meshStandardMaterial color={palette.paint} metalness={0.45} /></mesh>
       <mesh position={[side * 0.79, 1.47, 0.46]}><boxGeometry args={[0.05, 0.72, 0.085]} /><meshStandardMaterial color={palette.trim} /></mesh>
+      <mesh position={[side * 0.82, 1.47, 1.5]} rotation-x={-0.85}><boxGeometry args={[0.13, 1.1, 0.09]} /><meshStandardMaterial color={palette.paint} metalness={0.45} /></mesh>
+      <mesh position={[side * 0.73, 1.8, 0.26]}><boxGeometry args={[0.065, 0.055, 1.72]} /><meshStandardMaterial color={palette.paint} metalness={0.45} /></mesh>
       <Panel color={palette.glass} glass points={[[side * 0.93, 1.15, 0.51], [side * 0.74, 1.79, 0.51], [side * 0.72, 1.78, 1.09], [side * 0.95, 1.15, 1.88]]} />
       <group position={[side * 0.95, 1.06, -0.87]} rotation-y={doorsOpen ? -side * 0.8 : 0}>
         <Panel color={palette.glass} glass points={[[0, 0.04, 0], [0, 0.04, 1.28], [-side * 0.23, 0.73, 1.28], [-side * 0.23, 0.73, 0.31]]} />
