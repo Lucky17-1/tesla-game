@@ -20,6 +20,7 @@ export const Route = createFileRoute("/cars/volterra-gt-one")({
           "Original concept electric grand tourer with clearly labeled estimates for range, charging and performance.",
       },
       { property: "og:type", content: "article" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: ConceptCarPage,

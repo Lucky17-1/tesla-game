@@ -6,6 +6,8 @@ import { SITE } from "@/config/site";
 export const Route = createFileRoute("/cars/")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       { title: `Cars — ${SITE.name}` },
       {
         name: "description",
