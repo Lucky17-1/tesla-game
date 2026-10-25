@@ -1,4 +1,4 @@
-import { Canvas } from "@react-three/fiber";
+import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Environment, Lightformer, Sky } from "@react-three/drei";
 import { Component, Suspense, useEffect, useRef, useState, type ReactNode } from "react";
 import { CarFront, Armchair, DoorOpen, Maximize, Minimize, Play, Square, Volume2, VolumeX, X, RotateCcw } from "lucide-react";
@@ -19,6 +19,7 @@ class ViewerBoundary extends Component<{ children: ReactNode }, { failed: boolea
 
 function ViewerScene({ interior, running, doorsOpen }: { interior: boolean; running: boolean; doorsOpen: boolean }) {
   const colors = useVehiclePalette();
+  useFrame(({ camera }) => { if (interior) camera.lookAt(0, 0.65, -60); });
   return <>
     <color attach="background" args={[colors.sky]} />
     <fog attach="fog" args={[colors.sky, 42, 100]} />

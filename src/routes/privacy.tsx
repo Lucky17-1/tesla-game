@@ -22,14 +22,14 @@ function PrivacyPage() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
       <h1 className="font-display text-4xl font-bold">Privacy policy</h1>
-      <p className="mt-2 text-sm text-muted-foreground">Last updated: 22 October 2026</p>
+      <p className="mt-2 text-sm text-muted-foreground">Last updated: 25 October 2026</p>
 
       <div className="prose-ev mt-6">
         <h2>The short version</h2>
         <p>
-          {SITE.name} does not run user accounts and does not collect personal
-          information on its own servers. The small amount of data this site
-          uses stays in your browser.
+          Public pages and the racing game do not require an account. Contact
+          submissions are stored privately for the site owner. Game scores and
+          sound preferences stay in your browser.
         </p>
         <h2>What is stored in your browser</h2>
         <ul>
@@ -49,10 +49,17 @@ function PrivacyPage() {
           You can erase all of this at any time by clearing this site's data in
           your browser settings.
         </p>
+        <p>
+          The owner dashboard uses a secure, HttpOnly session cookie after the
+          owner password is verified. The session expires after eight hours;
+          locking the dashboard clears it.
+        </p>
         <h2>Third-party services</h2>
         <p>
-          Today this site loads web fonts from Google Fonts. No advertising,
-          analytics or tracking scripts are active. If advertising is enabled in
+          This site loads web fonts from Google Fonts. Selecting the interior
+          music video loads a YouTube player, which may set cookies, show ads,
+          and process information under Google's privacy policy. No YouTube
+          player loads before you select the video. If site advertising is enabled in
           the future (for example Google AdSense), it will only load after we
           configure it and, where required by law, after your consent via the
           cookie notice. Its providers would then set their own cookies under
@@ -60,14 +67,15 @@ function PrivacyPage() {
         </p>
         <h2>Contact form</h2>
         <p>
-          Our contact form runs entirely in your browser: it validates your
-          input and opens your own email application with the message prepared.
-          Nothing is transmitted to or stored by this site.
+          The form sends your name, email, subject, message and submission time
+          to our backend. Only the site owner can read the stored submissions.
+          A hashed network identifier is used for spam protection. Email alerts
+          are not active until a sending service is configured and tested.
         </p>
         <h2>Children</h2>
         <p>
           This site is not directed at children under 13 and we do not
-          knowingly collect their data — there is no data collection to speak of.
+          knowingly collect their data.
         </p>
         <h2>Changes</h2>
         <p>
