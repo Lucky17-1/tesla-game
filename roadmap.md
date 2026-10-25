@@ -1,5 +1,11 @@
 # Roadmap — VoltEdge (EV news site + racing game)
 
+## Current request — personalized homepage car and owner entry
+- [ ] Personalize homepage exterior/interior, Deshmukh plate and driver likeness from lucky.jpeg.
+- [ ] Add start/stop moving scenery and audio; center-screen Aaj Ki Raat playback and fullscreen.
+- [ ] Replace owner email sign-in with server-validated password gate; preserve private messages and dashboard actions.
+- [ ] Verify car controls and password-protected dashboard end-to-end.
+
 ## 1. Foundation
 - [x] Install game dependencies (three, R3F, drei, zustand)
 - [x] Design system in src/styles.css (dark futuristic, red accents, oklch tokens)
