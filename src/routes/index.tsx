@@ -19,6 +19,8 @@ export const Route = createFileRoute("/")({
           "Independent EV news, guides and reviews, plus a free playable browser racing game. Unofficial, original and clearly labeled.",
       },
       { property: "og:title", content: `${SITE.name} — Electric Performance, Decoded` },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
       {
         property: "og:description",
         content:
@@ -136,11 +138,13 @@ function HomePage() {
       </section>
 
       {/* 3D viewer */}
-      <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
-        <h2 className="font-display text-3xl font-bold">Explore it in 3D</h2>
-        <p className="mt-1 mb-4 text-sm text-muted-foreground">Switch between the exterior and the cockpit. Drag to look around.</p>
-        <ClientOnly fallback={<div className="aspect-video w-full rounded-xl border border-border bg-card" />}>
-          <Suspense fallback={<div className="aspect-video w-full rounded-xl border border-border bg-card" />}>
+      <section className="w-full py-8">
+        <div className="mx-auto max-w-6xl px-4 pb-4 sm:px-6">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-primary">Deshmukh edition</p>
+          <h2 className="font-display text-3xl font-bold">Your Tesla experience</h2>
+        </div>
+        <ClientOnly fallback={<div className="aspect-video w-full bg-card" />}>
+          <Suspense fallback={<div className="aspect-video w-full bg-card" />}>
             <CarViewer />
           </Suspense>
         </ClientOnly>
