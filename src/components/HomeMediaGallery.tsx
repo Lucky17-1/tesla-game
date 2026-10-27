@@ -64,7 +64,6 @@ export function HomeMediaGallery() {
         <video
           key={selected.id}
           ref={videoRef}
-          src={selected.video}
           poster={selected.poster}
           aria-label={`${selected.title} video`}
           className="h-full w-full object-contain"
@@ -76,7 +75,10 @@ export function HomeMediaGallery() {
           onPause={() => setPlaying(false)}
           onEnded={() => setPlaying(false)}
           onError={() => { setFailed(true); setPlaying(false); }}
-        />
+        >
+          <source src={selected.video} type={'video/mp4; codecs="avc1.4D401F, mp4a.40.2"'} />
+          <source src={selected.webm} type='video/webm; codecs="vp9, opus"' />
+        </video>
         {failed && (
           <div role="alert" className="absolute inset-x-0 top-0 flex items-center justify-center gap-3 bg-background/95 px-4 py-4 text-sm text-foreground">
             <span>This video could not load.</span>
