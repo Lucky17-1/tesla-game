@@ -84,7 +84,10 @@ export function HomeMediaGallery() {
           onPlay={() => { setPlaying(true); setFailed(false); }}
           onPause={() => setPlaying(false)}
           onEnded={() => setPlaying(false)}
-          onError={() => { setFailed(true); setPlaying(false); }}
+          onError={(event) => {
+            // A failed source can bubble while the compatible fallback succeeds.
+            if (event.currentTarget.error) { setFailed(true); setPlaying(false); }
+          }}
         >
           <source src={selected.video} type={'video/mp4; codecs="avc1.4D401F, mp4a.40.2"'} />
           <source src={selected.webm} type='video/webm; codecs="vp9, opus"' />
