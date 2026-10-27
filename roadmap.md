@@ -1,5 +1,11 @@
 # Roadmap — VoltEdge (EV news site + racing game)
 
+## Current request — driving and drift simulator
+- [ ] Replace the old /game experience with a woodland-road driving/drift simulator, licensed vehicle, driver portrait and Deshmukh plate.
+- [ ] Add camera angles, fullscreen, pause/restart, keyboard and touch driving, traffic/collision and driving telemetry.
+- [ ] Add a cabin YouTube screen starting with vf-XIsSWiGA, custom links and automatic queue advance; report provider playback/HD restrictions honestly.
+- [ ] Verify actual driving, camera views, fullscreen and mobile layout; preserve homepage media and private owner/contact flows.
+
 ## Current request — uploaded homepage media
 - [x] Replace the homepage car viewer and its controls with the seven October 27 uploaded videos.
 - [x] Provide a large player with sound/fullscreen controls and selectable video thumbnails, keeping the screenshot as reference only.
