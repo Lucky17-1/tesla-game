@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { homeMedia } from "@/data/home-media";
@@ -10,6 +10,18 @@ export function HomeMediaGallery() {
   const [failed, setFailed] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const selected = homeMedia[selectedIndex];
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.load();
+    if (continuePlaying) {
+      void video.play().catch(() => {
+        // A browser may require another explicit play gesture after switching.
+        setPlaying(false);
+      });
+    }
+  }, [selected?.id, continuePlaying]);
 
   if (!selected) return null;
 
@@ -62,7 +74,6 @@ export function HomeMediaGallery() {
 
       <div className="relative aspect-video w-full bg-vehicle-screen">
         <video
-          key={selected.id}
           ref={videoRef}
           poster={selected.poster}
           aria-label={`${selected.title} video`}
@@ -70,7 +81,6 @@ export function HomeMediaGallery() {
           controls
           playsInline
           preload="metadata"
-          autoPlay={continuePlaying}
           onPlay={() => { setPlaying(true); setFailed(false); }}
           onPause={() => setPlaying(false)}
           onEnded={() => setPlaying(false)}
