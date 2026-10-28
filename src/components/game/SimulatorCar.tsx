@@ -31,6 +31,8 @@ export function Sedan({ theme, color, interior = false }: { theme: SimulatorThem
       const mat = next[0];
       if (mat && !Array.isArray(node.material)) {
         const geometry = node.geometry.clone().applyMatrix4(node.matrixWorld);
+        for (const name of Object.keys(geometry.attributes)) if (name !== "position" && name !== "normal") geometry.deleteAttribute(name);
+        if (!geometry.getAttribute("normal")) geometry.computeVertexNormals();
         const batch = batches.get(mat.name);
         if (batch) { batch.geometries.push(geometry); mat.dispose(); } else batches.set(mat.name, { material: mat, geometries: [geometry] });
       }
