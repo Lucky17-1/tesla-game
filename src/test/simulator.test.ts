@@ -29,6 +29,40 @@ describe("Personalized simulator", () => {
     sim.reset(); expect(sim.body.position.z).toBe(0); expect(sim.body.velocity.length()).toBe(0);
   });
   it("recognizes the road and grass", () => { expect(roadOffset(0, 0)).toBe(0); expect(roadOffset(20, 0)).toBe(20); });
+  it("physically turns left and right with matching keyboard and touch signs", () => {
+    const idle = { throttle: false, brake: false, steer: 0, handbrake: false, drift: false };
+    for (const steer of [1, -1]) {
+      const sim = makeDrivingPhysics();
+      for (let i = 0; i < 90; i++) sim.step(idle, 1 / 60);
+      for (let i = 0; i < 100; i++) sim.step({ ...idle, throttle: true }, 1 / 60);
+      for (let i = 0; i < 60; i++) sim.step({ ...idle, throttle: true, steer }, 1 / 60);
+      if (steer === 1) expect(sim.body.position.x).toBeLessThan(2.6);
+      else expect(sim.body.position.x).toBeGreaterThan(2.6);
+    }
+  });
+  it("scores an on-road handbrake drift", () => {
+    const idle = { throttle: false, brake: false, steer: 0, handbrake: false, drift: false };
+    const sim = makeDrivingPhysics();
+    for (let i = 0; i < 90; i++) sim.step(idle, 1 / 60);
+    for (let i = 0; i < 160; i++) sim.step({ ...idle, throttle: true }, 1 / 60);
+    let result = sim.step({ ...idle, throttle: true, steer: 0.8, handbrake: true, drift: true }, 1 / 60);
+    for (let i = 1; i < 60; i++) result = sim.step({ ...idle, throttle: true, steer: 0.8, handbrake: true, drift: true }, 1 / 60);
+    expect(result.driftScore).toBeGreaterThan(50);
+    expect(result.offroad).toBe(false);
+  });
+  it("collides with traffic rather than passing through", () => {
+    const idle = { throttle: false, brake: false, steer: 0, handbrake: false, drift: false };
+    const sim = makeDrivingPhysics();
+    const traffic = sim.traffic[0];
+    if (!traffic) throw new Error("Traffic pool missing");
+    traffic.position.set(2.6, 0.65, -12); traffic.aabbNeedsUpdate = true;
+    let hits = 0;
+    sim.body.addEventListener("collide", () => { hits++; });
+    for (let i = 0; i < 90; i++) sim.step(idle, 1 / 60);
+    for (let i = 0; i < 150; i++) sim.step({ ...idle, throttle: true }, 1 / 60);
+    expect(hits).toBeGreaterThan(0);
+    expect(sim.body.position.z).toBeGreaterThan(-12);
+  });
   it("keeps all four suspension wheels in contact with the rotated ground", () => {
     const sim = makeDrivingPhysics();
     for (let i = 0; i < 120; i++) sim.step({ throttle: false, brake: false, steer: 0, handbrake: false, drift: false }, 1 / 60);

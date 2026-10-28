@@ -60,6 +60,7 @@ export function makeDrivingPhysics() {
   function reset() {
     body.position.set(2.6, 0.8, 0); body.velocity.setZero(); body.angularVelocity.setZero();
     body.quaternion.set(0, 0, 0, 1); body.force.setZero(); body.torque.setZero();
+    body.aabbNeedsUpdate = true;
     steering = 0; distance = 0; driftScore = 0;
     world.accumulator = 0;
   }
