@@ -71,7 +71,7 @@ export function makeDrivingPhysics() {
     vehicle.setSteeringValue(steering, 0); vehicle.setSteeringValue(steering, 1);
     const force = input.throttle && speed < CAR.topSpeed ? CAR.engineForce * (offroad ? 0.5 : 1) : 0;
     for (let i = 0; i < 4; i++) {
-      vehicle.applyEngineForce(i >= 2 ? -force : 0, i);
+      vehicle.applyEngineForce(i >= 2 ? force : 0, i);
       vehicle.setBrake(input.brake ? CAR.brakeForce : input.handbrake && i >= 2 ? 24 : 0, i);
       const wheel = vehicle.wheelInfos[i];
       if (wheel) wheel.frictionSlip = offroad ? 1.8 : i >= 2 && (input.handbrake || input.drift) ? 1.05 : 4.6;
