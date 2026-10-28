@@ -40,6 +40,8 @@ export function Sedan({ theme, color, interior = false }: { theme: SimulatorThem
       const merged = new THREE.Group();
       for (const batch of batches.values()) { const geometry = mergeGeometries(batch.geometries, false); if (!geometry) continue; const mesh = new THREE.Mesh(geometry, batch.material); mesh.castShadow = true; mesh.receiveShadow = true; merged.add(mesh); batch.geometries.forEach((g) => g.dispose()); }
       rotation.rotation.y = 0;
+      rotation.scale.setScalar(1);
+      rotation.position.set(0, 0, 0);
       rotation.add(merged);
     }
     return rotation;
