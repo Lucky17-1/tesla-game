@@ -105,6 +105,35 @@
   --vehicle-line: #e2e2d7;
   --vehicle-skin: #b98563;
   --vehicle-screen: #060808;
+  --sim-sky: #c8dde1;
+  --sim-fog: #c8dde1;
+  --sim-ground: #5a7050;
+  --sim-asphalt: #45494a;
+  --sim-line: #eee8ce;
+  --sim-grain: #92938c;
+  --sim-paint: #181c1e;
+  --sim-glass: #52686b;
+  --sim-trim: #202628;
+  --sim-seat: #dfe4de;
+  --sim-metal: #8d989c;
+  --sim-light: #f4f7ef;
+  --sim-tail: #ed3c37;
+  --sim-skin: #b48260;
+  --sim-hill: #6f8369;
+}
+
+.simulator { position: relative; width: 100%; height: min(850px, calc(100svh - 76px)); min-height: 570px; overflow: hidden; background: var(--sim-sky); touch-action: none; isolation: isolate; }
+.simulator:fullscreen, .simulator.sim-expanded { height: 100dvh; min-height: 0; }
+.simulator.sim-expanded { position: fixed; inset: 0; z-index: 90; }
+.sim-hud { background: color-mix(in oklab, var(--background) 80%, transparent); backdrop-filter: blur(12px); }
+.sim-camera-bar { scrollbar-width: none; }
+.sim-camera-bar::-webkit-scrollbar { display: none; }
+.sim-screen { width: 480px; height: 270px; background: var(--vehicle-screen); border: 12px solid var(--sim-trim); border-radius: 8px; overflow: hidden; }
+.sim-screen iframe { width: 100%; height: 100%; border: 0; }
+.sim-touch { width: 64px; height: 64px; touch-action: none; user-select: none; border-radius: 50%; }
+@media (max-width: 640px) {
+  .simulator { height: calc(100svh - 64px); min-height: 610px; }
+  .sim-touch { width: 58px; height: 64px; }
 }
 
 .vehicle-viewer { position: relative; width: 100%; scroll-margin-top: 96px; }
