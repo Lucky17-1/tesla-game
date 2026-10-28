@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { DEFAULT_MUSIC, FIRST_VIDEO, nextTrack, parseYouTubeLink } from "@/game/music";
 import { makeDrivingPhysics, roadOffset } from "@/game/simulator-physics";
 import { CAMERA_VIEWS, useSimulator } from "@/game/simulator-store";
+import { readDrivingInput } from "@/game/simulator-input";
 
 describe("Personalized simulator", () => {
   it("starts music with the user's exact requested video", () => {
@@ -28,4 +29,16 @@ describe("Personalized simulator", () => {
     sim.reset(); expect(sim.body.position.z).toBe(0); expect(sim.body.velocity.length()).toBe(0);
   });
   it("recognizes the road and grass", () => { expect(roadOffset(0, 0)).toBe(0); expect(roadOffset(20, 0)).toBe(20); });
+  it("keeps all four suspension wheels in contact with the rotated ground", () => {
+    const sim = makeDrivingPhysics();
+    for (let i = 0; i < 120; i++) sim.step({ throttle: false, brake: false, steer: 0, handbrake: false, drift: false }, 1 / 60);
+    expect(sim.vehicle.wheelInfos.map((wheel) => wheel.isInContact)).toEqual([true, true, true, true]);
+  });
+  it("maps left and right consistently for keyboard and touch", () => {
+    const touch = { left: false, right: false, throttle: false, brake: false, handbrake: false };
+    expect(readDrivingInput(new Set(["KeyA"]), touch, false).steer).toBe(1);
+    expect(readDrivingInput(new Set(), { ...touch, left: true }, false).steer).toBe(1);
+    expect(readDrivingInput(new Set(["KeyD"]), touch, false).steer).toBe(-1);
+    expect(readDrivingInput(new Set(), { ...touch, right: true }, false).steer).toBe(-1);
+  });
 });

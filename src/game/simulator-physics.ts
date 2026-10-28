@@ -28,6 +28,7 @@ export function makeDrivingPhysics() {
   world.addContactMaterial(new CANNON.ContactMaterial(groundMaterial, carMaterial, { friction: 0.3, restitution: 0.08 }));
   const ground = new CANNON.Body({ mass: 0, material: groundMaterial, shape: new CANNON.Plane() });
   ground.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
+  ground.aabbNeedsUpdate = true;
   world.addBody(ground);
   const body = new CANNON.Body({ mass: CAR.mass, material: carMaterial, position: new CANNON.Vec3(2.6, 0.8, 0) });
   body.addShape(new CANNON.Box(new CANNON.Vec3(0.91, 0.25, 2.1)));
