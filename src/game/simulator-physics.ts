@@ -52,6 +52,7 @@ export function makeDrivingPhysics() {
   const traffic: CANNON.Body[] = [];
   for (let i = 0; i < 4; i++) {
     const obstacle = new CANNON.Body({ type: CANNON.Body.KINEMATIC, mass: 0, material: carMaterial, shape: new CANNON.Box(new CANNON.Vec3(0.94, 0.65, 2.3)) });
+    obstacle.position.set(-400, 0.65, i * 20);
     world.addBody(obstacle);
     traffic.push(obstacle);
   }
@@ -59,6 +60,7 @@ export function makeDrivingPhysics() {
     body.position.set(2.6, 0.8, 0); body.velocity.setZero(); body.angularVelocity.setZero();
     body.quaternion.set(0, 0, 0, 1); body.force.setZero(); body.torque.setZero();
     steering = 0; distance = 0; driftScore = 0;
+    world.accumulator = 0;
   }
   function step(input: DrivingInput, dt: number) {
     const speed = Math.hypot(body.velocity.x, body.velocity.z);
