@@ -28,6 +28,7 @@ export function makeDrivingPhysics() {
   world.addContactMaterial(new CANNON.ContactMaterial(groundMaterial, carMaterial, { friction: 0.3, restitution: 0.08 }));
   const ground = new CANNON.Body({ mass: 0, material: groundMaterial, shape: new CANNON.Plane() });
   ground.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
+  ground.aabbNeedsUpdate = true;
   world.addBody(ground);
   const body = new CANNON.Body({ mass: CAR.mass, material: carMaterial, position: new CANNON.Vec3(2.6, 0.8, 0) });
   body.addShape(new CANNON.Box(new CANNON.Vec3(0.91, 0.25, 2.1)));
@@ -52,13 +53,16 @@ export function makeDrivingPhysics() {
   const traffic: CANNON.Body[] = [];
   for (let i = 0; i < 4; i++) {
     const obstacle = new CANNON.Body({ type: CANNON.Body.KINEMATIC, mass: 0, material: carMaterial, shape: new CANNON.Box(new CANNON.Vec3(0.94, 0.65, 2.3)) });
+    obstacle.position.set(-400, 0.65, i * 20);
     world.addBody(obstacle);
     traffic.push(obstacle);
   }
   function reset() {
     body.position.set(2.6, 0.8, 0); body.velocity.setZero(); body.angularVelocity.setZero();
     body.quaternion.set(0, 0, 0, 1); body.force.setZero(); body.torque.setZero();
+    body.aabbNeedsUpdate = true;
     steering = 0; distance = 0; driftScore = 0;
+    world.accumulator = 0;
   }
   function step(input: DrivingInput, dt: number) {
     const speed = Math.hypot(body.velocity.x, body.velocity.z);
@@ -68,7 +72,7 @@ export function makeDrivingPhysics() {
     vehicle.setSteeringValue(steering, 0); vehicle.setSteeringValue(steering, 1);
     const force = input.throttle && speed < CAR.topSpeed ? CAR.engineForce * (offroad ? 0.5 : 1) : 0;
     for (let i = 0; i < 4; i++) {
-      vehicle.applyEngineForce(i >= 2 ? -force : 0, i);
+      vehicle.applyEngineForce(i >= 2 ? force : 0, i);
       vehicle.setBrake(input.brake ? CAR.brakeForce : input.handbrake && i >= 2 ? 24 : 0, i);
       const wheel = vehicle.wheelInfos[i];
       if (wheel) wheel.frictionSlip = offroad ? 1.8 : i >= 2 && (input.handbrake || input.drift) ? 1.05 : 4.6;

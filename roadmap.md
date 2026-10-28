@@ -1,6 +1,7 @@
 # Roadmap — VoltEdge (EV news site + racing game)
 
 ## Current request — driving and drift simulator
+- [ ] Resume and finish the previously interrupted simulator integration.
 - [ ] Replace the old /game experience with a woodland-road driving/drift simulator, licensed vehicle, driver portrait and Deshmukh plate.
 - [ ] Add camera angles, fullscreen, pause/restart, keyboard and touch driving, traffic/collision and driving telemetry.
 - [ ] Add a cabin YouTube screen starting with vf-XIsSWiGA, custom links and automatic queue advance; report provider playback/HD restrictions honestly.
