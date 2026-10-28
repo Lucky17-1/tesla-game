@@ -43,11 +43,11 @@ export function SimulatorWorld({ theme }: { theme: SimulatorTheme }) {
   return <>
     <mesh rotation-x={-Math.PI / 2} receiveShadow><planeGeometry args={[1500, 1500]} /><meshStandardMaterial map={grass} roughness={1} /></mesh>
     <mesh geometry={road} receiveShadow><meshStandardMaterial map={asphalt} roughness={0.96} side={THREE.DoubleSide} /></mesh>
-    {Array.from({ length: 10 }, (_, i) => <mesh key={i} position={[-110 + Math.cos(i * 0.63) * 400, -20, Math.sin(i * 0.63) * 420]} scale={[160, 75 + i % 3 * 25, 150]}><sphereGeometry args={[1, 16, 10]} /><meshStandardMaterial color={theme.hill} roughness={1} /></mesh>)}
+    {Array.from({ length: 10 }, (_, i) => <mesh key={i} position={[-110 + Math.cos(i * 0.63) * 400, -20, Math.sin(i * 0.63) * 420]} scale={[140, 145 + i % 3 * 35, 150]}><coneGeometry args={[1, 2, 11, 3]} /><meshStandardMaterial color={theme.hill} roughness={1} /></mesh>)}
   </>;
 }
 
-export function Woodland() {
+export function Woodland({ theme }: { theme: SimulatorTheme }) {
   const oakModel = useGLTF(oak.url); const pineModel = useGLTF(pine.url);
   const parts = useMemo(() => {
     const result: { geometry: THREE.BufferGeometry; material: THREE.Material | THREE.Material[]; matrices: THREE.Matrix4[] }[] = [];
@@ -57,18 +57,21 @@ export function Woodland() {
       source.traverse((node) => {
         if (!(node instanceof THREE.Mesh)) return;
         const matrices: THREE.Matrix4[] = [];
-        for (let i = 0; i < 100; i++) {
-          const t = i / 100 * Math.PI * 2 + kind * 0.023;
-          const side = i % 2 === 0 ? -1 : 1; const p = trackPoint(t, side * (14 + i % 7 * 4));
-          const scale = (7 + i % 4 * 1.8) / size.y;
+        for (let i = 0; i < 280; i++) {
+          const t = i / 280 * Math.PI * 2 + kind * 0.023;
+          const side = i % 2 === 0 ? -1 : 1; const p = trackPoint(t, side * (12 + i % 7 * 4));
+          const scale = (8 + i % 4 * 1.8) / size.y;
           const normalization = new THREE.Matrix4().makeScale(scale, scale, scale).multiply(new THREE.Matrix4().makeTranslation(-center.x, -bounds.min.y, -center.z));
           const placement = new THREE.Matrix4().compose(new THREE.Vector3(p.x, 0, p.z), new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), i * 1.7), new THREE.Vector3(1, 1, 1));
           matrices.push(placement.multiply(normalization).multiply(node.matrixWorld));
         }
-        result.push({ geometry: node.geometry, material: node.material, matrices });
+        const source = Array.isArray(node.material) ? node.material[0] : node.material;
+        const material = source?.clone() as THREE.MeshStandardMaterial | undefined;
+        if (material) material.color.set(material.name.startsWith("leaf") ? kind === 1 ? theme.ground : theme.hill : theme.trim);
+        result.push({ geometry: node.geometry, material: material ?? node.material, matrices });
       });
     }
     return result;
-  }, [oakModel.scene, pineModel.scene]);
+  }, [oakModel.scene, pineModel.scene, theme]);
   return <group>{parts.map((part, i) => <instancedMesh key={i} args={[part.geometry, part.material, part.matrices.length]} ref={(mesh) => { if (!mesh) return; part.matrices.forEach((matrix, index) => mesh.setMatrixAt(index, matrix)); mesh.instanceMatrix.needsUpdate = true; mesh.computeBoundingSphere(); }} />)}</group>;
 }

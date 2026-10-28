@@ -122,7 +122,7 @@
   --sim-hill: #6f8369;
 }
 
-.simulator { position: relative; width: 100%; height: min(850px, calc(100svh - 76px)); min-height: 570px; overflow: hidden; background: var(--sim-sky); touch-action: none; isolation: isolate; }
+.simulator { position: relative; width: 100%; height: calc(100svh - 76px); min-height: 570px; overflow: hidden; background: var(--sim-sky); touch-action: none; isolation: isolate; }
 .simulator:fullscreen, .simulator.sim-expanded { height: 100dvh; min-height: 0; }
 .simulator.sim-expanded { position: fixed; inset: 0; z-index: 90; }
 .sim-hud { background: color-mix(in oklab, var(--background) 80%, transparent); backdrop-filter: blur(12px); }
@@ -133,7 +133,7 @@
 .sim-touch { width: 64px; height: 64px; touch-action: none; user-select: none; border-radius: 50%; }
 @media (max-width: 640px) {
   .simulator { height: calc(100svh - 64px); min-height: 610px; }
-  .sim-touch { width: 58px; height: 64px; }
+  .sim-touch { width: 50px; height: 58px; }
 }
 
 .vehicle-viewer { position: relative; width: 100%; scroll-margin-top: 96px; }

@@ -63,15 +63,15 @@ function HomePage() {
           </h1>
           <p className="mt-4 max-w-xl animate-fade-up text-lg text-muted-foreground">
             Original EV news, guides and concept design — plus{" "}
-            <strong className="font-semibold text-foreground">VoltEdge Circuit</strong>,
-            a free racing game that runs right in your browser.
+            <strong className="font-semibold text-foreground">Deshmukh Drive</strong>,
+            a free driving simulator that runs right in your browser.
           </p>
           <div className="mt-8 flex animate-fade-up flex-wrap gap-3">
             <Link
               to="/game"
               className="rounded-lg bg-primary px-6 py-3 font-display font-semibold text-primary-foreground transition-all hover:bg-primary/90 hover:shadow-[0_0_32px_-6px_var(--primary)]"
             >
-              Play the racing game
+              Play the driving simulator
             </Link>
             <Link
               to="/cars/volterra-gt-one"
@@ -179,11 +179,11 @@ function HomePage() {
           <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-background/20" />
           <div className="relative p-8 sm:p-12">
             <h2 className="max-w-md font-display text-3xl font-bold sm:text-4xl">
-              VoltEdge Circuit
+              Deshmukh Drive
             </h2>
             <p className="mt-3 max-w-md text-muted-foreground">
-              Dodge traffic, chase energy cells and beat your personal best in a
-              free 3D racing game. Keyboard and touch controls, no download.
+              Drive the alpine circuit in your personalized sedan, switch into
+              drift mode and enjoy the cabin view. Free to play, no download.
             </p>
             <Link
               to="/game"

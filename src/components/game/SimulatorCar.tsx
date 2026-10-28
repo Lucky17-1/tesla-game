@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { Html, useGLTF, useTexture } from "@react-three/drei";
 import * as THREE from "three";
+import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import sedan from "@/assets/simulator/sedan.glb.asset.json";
 import face from "@/assets/simulator/driver-face.jpg.asset.json";
 import type { SimulatorTheme } from "@/game/simulator-theme";
@@ -13,6 +14,8 @@ export function Sedan({ theme, color, interior = false }: { theme: SimulatorThem
     const rotation = new THREE.Group(); rotation.rotation.y = Math.PI; rotation.add(clone); rotation.updateMatrixWorld(true);
     const bounds = new THREE.Box3().setFromObject(rotation); const size = bounds.getSize(new THREE.Vector3()); const center = bounds.getCenter(new THREE.Vector3());
     const scale = 4.55 / size.z; rotation.scale.setScalar(scale); rotation.position.set(-center.x * scale, -bounds.min.y * scale, -center.z * scale);
+    const batches = new Map<string, { material: THREE.MeshStandardMaterial; geometries: THREE.BufferGeometry[] }>();
+    clone.updateMatrixWorld(true);
     clone.traverse((node) => {
       if (!(node instanceof THREE.Mesh)) return;
       node.castShadow = true; node.receiveShadow = true;
@@ -25,7 +28,20 @@ export function Sedan({ theme, color, interior = false }: { theme: SimulatorThem
         return mat;
       });
       node.material = Array.isArray(node.material) ? next : next[0] ?? node.material;
+      const mat = next[0];
+      if (mat && !Array.isArray(node.material)) {
+        const geometry = node.geometry.clone().applyMatrix4(node.matrixWorld);
+        const batch = batches.get(mat.name);
+        if (batch) { batch.geometries.push(geometry); mat.dispose(); } else batches.set(mat.name, { material: mat, geometries: [geometry] });
+      }
     });
+    if (!interior) {
+      rotation.remove(clone);
+      const merged = new THREE.Group();
+      for (const batch of batches.values()) { const geometry = mergeGeometries(batch.geometries, false); if (!geometry) continue; const mesh = new THREE.Mesh(geometry, batch.material); mesh.castShadow = true; mesh.receiveShadow = true; merged.add(mesh); batch.geometries.forEach((g) => g.dispose()); }
+      rotation.rotation.y = 0;
+      rotation.add(merged);
+    }
     return rotation;
   }, [gltf.scene, theme, color, interior]);
   return <primitive object={model} />;
@@ -40,7 +56,7 @@ function Plate({ theme }: { theme: SimulatorTheme }) {
   return <mesh position={[0, 0.55, 2.287]}><planeGeometry args={[0.65, 0.16]} /><meshBasicMaterial map={texture} /></mesh>;
 }
 
-export function PersonalizedSedan({ theme, cabin, music, muted }: { theme: SimulatorTheme; cabin: boolean; music: boolean; muted: boolean }) {
+export function PersonalizedSedan({ theme, cabin, driverView, music, muted }: { theme: SimulatorTheme; cabin: boolean; driverView: boolean; music: boolean; muted: boolean }) {
   const portrait = useTexture(face.url); portrait.colorSpace = THREE.SRGBColorSpace;
   return <>
     <Sedan theme={theme} interior={cabin} />
@@ -58,8 +74,8 @@ export function PersonalizedSedan({ theme, cabin, music, muted }: { theme: Simul
         <mesh><torusGeometry args={[0.21, 0.025, 8, 30]} /><meshStandardMaterial color={theme.trim} /></mesh>
         <mesh><boxGeometry args={[0.36, 0.055, 0.04]} /><meshStandardMaterial color={theme.metal} /></mesh>
       </group>
-      <mesh position={[0.47, 1.16, 0.08]}><boxGeometry args={[0.39, 0.52, 0.17]} /><meshStandardMaterial color={theme.trim} /></mesh>
-      <mesh position={[0.47, 1.5, 0.03]} rotation-y={Math.PI}><planeGeometry args={[0.25, 0.3]} /><meshBasicMaterial map={portrait} side={THREE.DoubleSide} /></mesh>
+      <mesh visible={!driverView} position={[0.47, 0.97, 0.08]}><boxGeometry args={[0.39, 0.44, 0.17]} /><meshStandardMaterial color={theme.trim} /></mesh>
+      <mesh visible={!driverView} position={[0.47, 1.28, 0.03]} rotation-y={Math.PI}><planeGeometry args={[0.25, 0.3]} /><meshBasicMaterial map={portrait} side={THREE.DoubleSide} /></mesh>
       {[-1, 1].map((side) => <group key={side} position={[0.47 + side * 0.15, 1.02, -0.26]} rotation-x={0.8} rotation-z={side * 0.15}><mesh><capsuleGeometry args={[0.045, 0.38, 4, 8]} /><meshStandardMaterial color={theme.skin} /></mesh></group>)}
       {cabin && <>
         {[-0.9, 0.9].map((x) => <mesh key={x} position={[x, 0.86, -0.55]} rotation-x={-0.25}><boxGeometry args={[0.05, 1.1, 0.06]} /><meshStandardMaterial color={theme.trim} /></mesh>)}

@@ -67,7 +67,7 @@ export function SimulatorScene({ theme, music, muted, onReady }: { theme: Simula
     if (player.current) { player.current.position.set(b.position.x, b.position.y - 0.58, b.position.z); player.current.quaternion.set(b.quaternion.x, b.quaternion.y, b.quaternion.z, b.quaternion.w); }
     physics.traffic.forEach((body, i) => { const group = cars.current[i]; if (!group) return; group.position.set(body.position.x, 0, body.position.z); group.quaternion.set(body.quaternion.x, body.quaternion.y, body.quaternion.z, body.quaternion.w); });
     temp.position.set(b.position.x, b.position.y - 0.58, b.position.z); temp.quaternion.set(b.quaternion.x, b.quaternion.y, b.quaternion.z, b.quaternion.w);
-    const offsets: Record<CameraView, [number, number, number]> = { Chase: [0.4, 3.5, 8.1], Driver: [0.48, 1.4, 0.35], Cabin: [-0.3, 1.4, 1.1], Hood: [0, 1.25, -1.9], Aerial: [0, 30, 12], Front: [4.2, 1.9, -6.9] };
+    const offsets: Record<CameraView, [number, number, number]> = { Chase: [0.4, 3.0, 7.3], Driver: [0.48, 1.35, -0.18], Cabin: [-0.48, 1.34, -0.05], Hood: [0, 1.25, -1.9], Aerial: [0, 30, 12], Front: [4.2, 1.9, -6.9] };
     temp.offset.set(...offsets[state.camera]).applyQuaternion(temp.quaternion).add(temp.position);
     const inside = state.camera === "Driver" || state.camera === "Cabin";
     if (inside || state.camera === "Hood") camera.position.copy(temp.offset); else camera.position.lerp(temp.offset, 1 - Math.exp(-5 * dt));
@@ -81,8 +81,8 @@ export function SimulatorScene({ theme, music, muted, onReady }: { theme: Simula
     <directionalLight position={[35, 60, -30]} intensity={2.6} castShadow shadow-mapSize-width={1024} shadow-mapSize-height={1024} shadow-camera-left={-25} shadow-camera-right={25} shadow-camera-top={25} shadow-camera-bottom={-25} shadow-bias={-0.0003} />
     <Environment resolution={64}><Lightformer intensity={3} position={[0, 12, 0]} rotation-x={-Math.PI / 2} scale={[25, 25, 1]} color={theme.light} /><Lightformer intensity={2} position={[15, 5, 0]} rotation-y={Math.PI / 2} scale={[25, 6, 1]} color={theme.sky} /></Environment>
     <SimulatorWorld theme={theme} />
-    <Suspense fallback={null}><Woodland /></Suspense>
-    <Suspense fallback={null}><group ref={player}><PersonalizedSedan theme={theme} cabin={cameraView === "Driver" || cameraView === "Cabin"} music={music} muted={muted} /></group>
+    <Suspense fallback={null}><Woodland theme={theme} /></Suspense>
+    <Suspense fallback={null}><group ref={player}><PersonalizedSedan theme={theme} cabin={cameraView === "Driver" || cameraView === "Cabin"} driverView={cameraView === "Driver"} music={music} muted={muted} /></group>
       {physics.traffic.map((_, i) => <group key={i} ref={(group) => { cars.current[i] = group; }}><Sedan theme={theme} color={i % 2 ? theme.tail : theme.light} /></group>)}
     </Suspense>
   </>;
