@@ -65,7 +65,7 @@ export function PersonalizedSedan({ theme, cabin, music, muted }: { theme: Simul
         {[-0.9, 0.9].map((x) => <mesh key={x} position={[x, 0.86, -0.55]} rotation-x={-0.25}><boxGeometry args={[0.05, 1.1, 0.06]} /><meshStandardMaterial color={theme.trim} /></mesh>)}
         <mesh position={[0, 1.67, -0.72]}><boxGeometry args={[1.8, 0.07, 0.4]} /><meshStandardMaterial color={theme.trim} /></mesh>
       </>}
-      <Html transform position={[-0.16, 1.02, -0.73]} rotation={[0, Math.PI, 0]} distanceFactor={0.58} zIndexRange={[20, 10]} style={{ visibility: cabin ? "visible" : "hidden" }}>
+      <Html transform position={[-0.16, 1.02, -0.73]} distanceFactor={0.58} zIndexRange={[20, 10]} style={{ visibility: cabin ? "visible" : "hidden" }}>
         <SimulatorMusic enabled={music} muted={muted} />
       </Html>
     </group>

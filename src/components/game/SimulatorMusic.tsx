@@ -60,7 +60,8 @@ export function SimulatorMusic({ enabled, muted }: { enabled: boolean; muted: bo
         },
       });
     }).catch(() => setStatus("YouTube could not connect"));
-    const unsubscribe = useSimulator.subscribe((s) => {
+    const unsubscribe = useSimulator.subscribe((s, previous) => {
+      if (s.state === previous.state) return;
       if (s.state === "driving") player.current?.playVideo(); else player.current?.pauseVideo();
     });
     const command = (e: Event) => {
