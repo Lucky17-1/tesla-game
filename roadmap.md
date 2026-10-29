@@ -1,5 +1,11 @@
 # Roadmap — VoltEdge (EV news site + racing game)
 
+## Current request — Maps, vehicle exchange and 360 cabin
+- [ ] Connect Google Maps and add a separate map/360 Street View starting at the supplied panorama and coordinates.
+- [ ] Replace default car with a licensed MPV and add luxury vehicle exchange; genuine Kia Carens requires a licensed asset if unavailable.
+- [ ] Add exterior/cabin 360 looking, rear-seat portrait and blinking; avoid claiming reconstructed 3D likeness.
+- [ ] Finish interrupted car-view correction and verify driving, switching, phone/tablet layout and cabin controls without live Maps sandbox requests.
+
 ## Current request — driving and drift simulator
 - [ ] Resume and finish the previously interrupted simulator integration.
 - [ ] Replace the old /game experience with a woodland-road driving/drift simulator, licensed vehicle, driver portrait and Deshmukh plate.
