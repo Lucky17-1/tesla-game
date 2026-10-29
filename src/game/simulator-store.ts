@@ -1,6 +1,7 @@
 import { create } from "zustand";
+import { resetCameraLook, type VehicleId } from "./simulator-vehicles";
 
-export const CAMERA_VIEWS = ["Chase", "Driver", "Cabin", "Hood", "Aerial", "Front"] as const;
+export const CAMERA_VIEWS = ["Chase", "Driver", "Cabin", "Rear seat", "Hood", "Aerial", "Front", "Orbit 360"] as const;
 export type CameraView = typeof CAMERA_VIEWS[number];
 export type DriveMode = "Touring" | "Drift";
 export type SimulatorState = "ready" | "driving" | "paused";
@@ -9,6 +10,7 @@ interface SimulatorStore {
   state: SimulatorState;
   camera: CameraView;
   mode: DriveMode;
+  vehicle: VehicleId;
   runId: number;
   speed: number;
   distance: number;
@@ -26,11 +28,12 @@ interface SimulatorStore {
   nextCamera: () => void;
   setCamera: (camera: CameraView) => void;
   setMode: (mode: DriveMode) => void;
+  setVehicle: (vehicle: VehicleId) => void;
   telemetry: (data: Pick<SimulatorStore, "speed" | "distance" | "driftScore" | "slip" | "steering" | "heading" | "offroad" | "impact">) => void;
 }
 
 export const useSimulator = create<SimulatorStore>((set, get) => ({
-  state: "ready", camera: "Chase", mode: "Touring", runId: 0,
+  state: "ready", camera: "Chase", mode: "Touring", vehicle: "mpv", runId: 0,
   speed: 0, distance: 0, driftScore: 0, slip: 0, steering: 0, heading: 0,
   offroad: false, impact: false, best: 0,
   start: () => set({ state: "driving" }),
@@ -43,9 +46,10 @@ export const useSimulator = create<SimulatorStore>((set, get) => ({
     set({ state: "paused", best });
   },
   resume: () => set({ state: "driving" }),
-  nextCamera: () => set((s) => ({ camera: CAMERA_VIEWS[(CAMERA_VIEWS.indexOf(s.camera) + 1) % CAMERA_VIEWS.length] ?? "Chase" })),
-  setCamera: (camera) => set({ camera }),
+  nextCamera: () => { resetCameraLook(); set((s) => ({ camera: CAMERA_VIEWS[(CAMERA_VIEWS.indexOf(s.camera) + 1) % CAMERA_VIEWS.length] ?? "Chase" })); },
+  setCamera: (camera) => { resetCameraLook(); set({ camera }); },
   setMode: (mode) => set({ mode }),
+  setVehicle: (vehicle) => { resetCameraLook(); set((s) => ({ vehicle, runId: s.runId + 1, speed: 0, distance: 0, driftScore: 0, impact: false, offroad: false, steering: 0, heading: 0 })); },
   telemetry: (data) => set(data),
 }));
 
