@@ -1,5 +1,7 @@
 # Simulator assets
 
+- Family MPV (desktop and mobile files): Innerscene original Generic minivan / MPV, CC0. Source: https://www.innerscene.com/tools/library/3d-parts/generic-minivan-mpv-ef315aef . Mobile geometry simplified from the original; unbranded substitute, not a genuine Kia Carens. License reverified October 30, 2026.
+
 - Touring sedan: Innerscene original Sedan car, CC0. Source: https://www.innerscene.com/tools/library/3d-parts/sedan-car-42109739 . Original unbranded exterior, not an official Tesla model. License verified October 28, 2026.
 - Oak and pine: Kenney Nature Kit, CC0. Source: https://kenney.nl/assets/nature-kit . Stored GLBs match the source pack byte-for-byte. License verified October 28, 2026.
 - Driver portrait: user-uploaded photo; face crop retained from that photo.

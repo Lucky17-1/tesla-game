@@ -13,12 +13,12 @@ export const Route = createFileRoute("/game")({
       {
         name: "description",
         content:
-          "Drive the Deshmukh sedan on a forest mountain circuit. A free 3D driving and drift simulator with cabin cameras, fullscreen and in-car YouTube.",
+          "Drive a personalized family MPV or luxury sedan on the alpine circuit, with 360 cabin cameras, fullscreen, in-car YouTube and a separate Google Street View at your chosen start location.",
       },
       { property: "og:title", content: "Deshmukh Drive — Alpine driving & drift simulator" },
       {
         property: "og:description",
-        content: "A personalized alpine-road driving simulator with drift mode, six cameras and a cabin YouTube screen. No download, no account.",
+        content: "Personalized MPV and luxury-sedan driving, eight cameras, cabin YouTube and separate Google Maps and Street View. No download, no account.",
       },
     ],
   }),

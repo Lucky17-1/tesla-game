@@ -4,7 +4,7 @@ import { Environment, Lightformer } from "@react-three/drei";
 import * as THREE from "three";
 import { makeDrivingPhysics, trackPoint, type DrivingInput } from "@/game/simulator-physics";
 import { CAMERA_VIEWS, clearDriveInput, driveInput, useSimulator, type CameraView } from "@/game/simulator-store";
-import { cameraLook, isInteriorCamera } from "@/game/simulator-vehicles";
+import { cameraLook, isInteriorCamera, isPortraitBlinking } from "@/game/simulator-vehicles";
 import { readDrivingInput } from "@/game/simulator-input";
 import type { SimulatorTheme } from "@/game/simulator-theme";
 import { audio } from "@/game/audio";
@@ -69,6 +69,8 @@ export function SimulatorScene({ theme, music, muted, active, onReady }: { theme
     if (state.state === "driving") { advance(dt, input); audio.updateEngine(telemetry.current.speed, input.throttle); hud.current += dt; if (hud.current >= 0.12) { hud.current = 0; publish(); } }
     else if (state.state === "ready") { physics.step({ throttle: false, brake: true, steer: 0, handbrake: false, drift: false }, dt); }
     const b = physics.body;
+    const blink = isPortraitBlinking(time.current);
+    for (const name of ["driver", "rear"]) { const eyes = vehicleModel.current?.getObjectByName(`portrait-blink-${name}`); if (eyes) eyes.visible = blink; }
     if (player.current) { player.current.position.set(b.position.x, b.position.y - 0.58, b.position.z); player.current.quaternion.set(b.quaternion.x, b.quaternion.y, b.quaternion.z, b.quaternion.w); }
     physics.traffic.forEach((body, i) => { const group = cars.current[i]; if (!group) return; group.position.set(body.position.x, 0, body.position.z); group.quaternion.set(body.quaternion.x, body.quaternion.y, body.quaternion.z, body.quaternion.w); });
     temp.position.set(b.position.x, b.position.y - 0.58, b.position.z); temp.quaternion.set(b.quaternion.x, b.quaternion.y, b.quaternion.z, b.quaternion.w);

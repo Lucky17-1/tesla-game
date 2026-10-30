@@ -1,6 +1,7 @@
 import { ArrowLeft, ArrowRight, Camera, Expand, Gauge, Hand, ListMusic, Pause, Play, RotateCcw, Shrink, Volume2, VolumeX, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CAMERA_VIEWS, driveInput, useSimulator } from "@/game/simulator-store";
+import { VEHICLES } from "@/game/simulator-vehicles";
 
 export function SimulatorHUD({ ready, expanded, onFullscreen, onStart, muted, onMute, onMusic }: { ready: boolean; expanded: boolean; onFullscreen: () => void; onStart: () => void; muted: boolean; onMute: () => void; onMusic: () => void }) {
   const sim = useSimulator();
@@ -25,7 +26,10 @@ export function SimulatorHUD({ ready, expanded, onFullscreen, onStart, muted, on
       <Camera className="mx-2 hidden size-4 shrink-0 sm:block" />
       {CAMERA_VIEWS.map((camera) => <Button key={camera} size="sm" variant={sim.camera === camera ? "secondary" : "ghost"} aria-pressed={sim.camera === camera} onClick={() => sim.setCamera(camera)} className="shrink-0 px-2 text-xs sm:px-3">{camera}</Button>)}
     </div>
-    {sim.state !== "ready" && <div className="sim-hud absolute right-3 top-40 min-w-28 rounded-md px-4 py-3 text-right sm:right-5">
+    <div className="sim-hud pointer-events-auto absolute left-3 top-36 flex gap-1 rounded-md p-1 sm:left-5" aria-label="Choose vehicle">
+      {VEHICLES.map((vehicle) => <Button key={vehicle.id} size="sm" variant={sim.vehicle === vehicle.id ? "secondary" : "ghost"} aria-pressed={sim.vehicle === vehicle.id} title={vehicle.category} onClick={() => sim.setVehicle(vehicle.id)} className="px-2 text-xs">{vehicle.name}</Button>)}
+    </div>
+    {sim.state !== "ready" && <div className="sim-hud absolute right-3 top-52 min-w-24 rounded-md px-3 py-2 text-right sm:right-5">
       <div className="font-display text-4xl font-bold tabular-nums" data-testid="sim-speed">{sim.speed}</div><div className="text-[10px] uppercase text-muted-foreground">km/h</div>
       <div className="mt-3 border-t border-border pt-2 font-display text-sm tabular-nums">{(sim.distance / 1000).toFixed(2)} <span className="text-muted-foreground">km</span></div>
       {sim.mode === "Drift" && <div className="mt-2 font-display text-primary" data-testid="drift-score">{sim.driftScore} <span className="text-xs">DRIFT</span></div>}
