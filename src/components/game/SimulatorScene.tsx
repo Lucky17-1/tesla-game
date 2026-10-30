@@ -25,6 +25,7 @@ export function SimulatorScene({ theme, music, muted, active, onReady }: { theme
   const vehicle = useSimulator((s) => s.vehicle);
   const vehicleModel = useRef<THREE.Group>(null);
   const readyVehicle = useRef<string | null>(null);
+  const cameraState = useRef("");
   const temp = useMemo(() => ({ position: new THREE.Vector3(), target: new THREE.Vector3(), offset: new THREE.Vector3(), look: new THREE.Vector3(), quaternion: new THREE.Quaternion() }), []);
   const telemetry = useRef({ speed: 0, distance: 0, driftScore: 0, slip: 0, steering: 0, offroad: false, yaw: 0 });
 
@@ -81,7 +82,9 @@ export function SimulatorScene({ theme, music, muted, active, onReady }: { theme
       temp.offset.set(Math.sin(cameraLook.yaw) * Math.cos(cameraLook.pitch) * cameraLook.distance, 1.0 + Math.sin(cameraLook.pitch + 0.28) * cameraLook.distance, Math.cos(cameraLook.yaw) * Math.cos(cameraLook.pitch) * cameraLook.distance).applyQuaternion(temp.quaternion).add(temp.position);
       temp.offset.y = Math.max(0.45, temp.offset.y);
     }
-    if (inside || state.camera === "Hood") camera.position.copy(temp.offset); else camera.position.lerp(temp.offset, 1 - Math.exp(-5 * dt));
+    const cameraKey = `${state.camera}:${state.vehicle}:${state.runId}`;
+    if (inside || state.camera === "Hood" || cameraState.current !== cameraKey) camera.position.copy(temp.offset); else camera.position.lerp(temp.offset, 1 - Math.exp(-5 * dt));
+    cameraState.current = cameraKey;
     if (inside) {
       temp.look.set(-Math.sin(cameraLook.yaw) * Math.cos(cameraLook.pitch), -Math.sin(cameraLook.pitch), -Math.cos(cameraLook.yaw) * Math.cos(cameraLook.pitch)).applyQuaternion(temp.quaternion);
       temp.target.copy(camera.position).add(temp.look);

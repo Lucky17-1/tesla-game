@@ -1,18 +1,21 @@
 # Roadmap — VoltEdge (EV news site + racing game)
 
 ## Current request — Maps, vehicle exchange and 360 cabin
-- [ ] Resume the interrupted October 29 work and resolve the incomplete camera integration.
-- [ ] Connect Google Maps and add a separate map/360 Street View starting at the supplied panorama and coordinates.
-- [ ] Replace default car with a licensed MPV and add luxury vehicle exchange; genuine Kia Carens requires a licensed asset if unavailable.
-- [ ] Add exterior/cabin 360 looking, rear-seat portrait and blinking; avoid claiming reconstructed 3D likeness.
-- [ ] Finish interrupted car-view correction and verify driving, switching, phone/tablet layout and cabin controls without live Maps sandbox requests.
+- [x] Resume the interrupted October 29 work and resolve the incomplete camera integration.
+- [x] Connect Google Maps and add a separate map/360 Street View starting at the supplied panorama and coordinates; localhost makes no Maps requests.
+- [x] Replace default car with a licensed generic MPV and add luxury vehicle exchange.
+- [x] Add exterior/cabin 360 looking, rear-seat portrait and blink timing; portrait is not a reconstructed 3D likeness.
+- [x] Verify driving, switching, camera selection, fullscreen, phone/tablet widths and touch acceleration; 16 tests pass.
+- [ ] Genuine Kia Carens / realistic likeness — blocked: requires licensed Carens asset and a 3D likeness asset.
+- [ ] Google Maps/Street View rendering — blocked: user must validate on an authorized deployed origin, outside the sandbox.
+- [ ] Real-device frame rate, feel and sound — blocked: sandbox software rendering and no speakers/physical device inputs; check Start driving on phone/tablet.
 
 ## Current request — driving and drift simulator
-- [ ] Resume and finish the previously interrupted simulator integration.
-- [ ] Replace the old /game experience with a woodland-road driving/drift simulator, licensed vehicle, driver portrait and Deshmukh plate.
-- [ ] Add camera angles, fullscreen, pause/restart, keyboard and touch driving, traffic/collision and driving telemetry.
-- [ ] Add a cabin YouTube screen starting with vf-XIsSWiGA, custom links and automatic queue advance; report provider playback/HD restrictions honestly.
-- [ ] Verify actual driving, camera views, fullscreen and mobile layout; preserve homepage media and private owner/contact flows.
+- [x] Resume and finish the previously interrupted simulator integration.
+- [x] Replace the old /game experience with a woodland-road driving/drift simulator, licensed vehicle, driver portrait and Deshmukh plate.
+- [x] Add camera angles, fullscreen, pause/restart, keyboard and touch driving, traffic/collision and driving telemetry.
+- [x] Add a cabin YouTube screen starting with vf-XIsSWiGA, custom links and automatic queue advance; playback/HD remain subject to YouTube restrictions.
+- [x] Verify driving, camera selection, fullscreen and mobile width; homepage media and private owner/contact flows remain unchanged.
 
 ## Current request — uploaded homepage media
 - [x] Replace the homepage car viewer and its controls with the seven October 27 uploaded videos.
