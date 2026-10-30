@@ -22,7 +22,7 @@ function PrivacyPage() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
       <h1 className="font-display text-4xl font-bold">Privacy policy</h1>
-      <p className="mt-2 text-sm text-muted-foreground">Last updated: 25 October 2026</p>
+      <p className="mt-2 text-sm text-muted-foreground">Last updated: 30 October 2026</p>
 
       <div className="prose-ev mt-6">
         <h2>The short version</h2>
@@ -56,10 +56,12 @@ function PrivacyPage() {
         </p>
         <h2>Third-party services</h2>
         <p>
-          This site loads web fonts from Google Fonts. Selecting the interior
-          music video loads a YouTube player, which may set cookies, show ads,
-          and process information under Google's privacy policy. No YouTube
-          player loads before you select the video. If site advertising is enabled in
+          This site loads web fonts from Google Fonts. Starting the driving
+          simulator loads a YouTube player, which may set cookies, show ads,
+          and process information under Google's privacy policy. Selecting Map
+          or Street View loads Google Maps, which processes usage and device
+          information under <a href="https://policies.google.com/privacy" className="text-primary underline">Google's privacy policy</a>.
+          We do not track your physical location. If site advertising is enabled in
           the future (for example Google AdSense), it will only load after we
           configure it and, where required by law, after your consent via the
           cookie notice. Its providers would then set their own cookies under

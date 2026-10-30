@@ -15,7 +15,14 @@ export const Route = createFileRoute("/news/$slug")({
   head: ({ loaderData }) => {
     const article = loaderData?.article;
     if (!article) {
-      return { meta: [{ title: "Article unavailable" }] };
+      return { meta: [
+        { title: `Article unavailable | ${SITE.name}` },
+        { name: "description", content: "This VoltEdge article is unavailable. Browse the latest electric vehicle news." },
+        { property: "og:title", content: `Article unavailable | ${SITE.name}` },
+        { property: "og:description", content: "Browse the latest electric vehicle news on VoltEdge." },
+        { property: "og:type", content: "website" },
+        { name: "twitter:card", content: "summary_large_image" },
+      ] };
     }
     return {
       meta: [

@@ -22,7 +22,7 @@ function TermsPage() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
       <h1 className="font-display text-4xl font-bold">Terms of use</h1>
-      <p className="mt-2 text-sm text-muted-foreground">Last updated: 22 October 2026</p>
+      <p className="mt-2 text-sm text-muted-foreground">Last updated: 30 October 2026</p>
 
       <div className="prose-ev mt-6">
         <h2>Acceptance</h2>
@@ -58,6 +58,12 @@ function TermsPage() {
           are not responsible for their content or practices.
         </p>
         <h2>Limitation of liability</h2>
+        <p>
+          Google Maps and Street View are provided by Google, separately from the
+          driving simulation, and are subject to <a href="https://maps.google.com/help/terms_maps/" className="text-primary underline">Google Maps End User Additional Terms of Service</a>
+          {" "}and <a href="https://policies.google.com/privacy" className="text-primary underline">Google's privacy policy</a>.
+          Street View is recorded imagery, not a live camera feed.
+        </p>
         <p>
           To the maximum extent permitted by law, {SITE.name} and its operators
           are not liable for indirect or consequential damages arising from your

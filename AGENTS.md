@@ -13,4 +13,6 @@
 - Contact submissions go through `submitContact` server fn (service role insert, honeypot, per-IP-hash rate limit); table has no anon grants; why: spam control and private data.
 - The /game simulator uses Cannon raycast-vehicle physics in a React-free module, one scene stepper and separate HUD/music/world modules; why: driving rules stay testable and homepage media stays independent.
 - Simulator materials use global CSS tokens and verified local GLBs with source/license records in src/assets/simulator/CREDITS.md; why: no runtime model CDN dependencies or unverified license claims.
-- Development-only window.__game exposes state, input, sim(seconds), camera(view), start/restart/pause and ?camera= view deep links; why: sandbox timing is slow and later checks must reuse deterministic driving controls.
+- Development-only window.__game exposes state, input, sim(seconds), camera(view), start/restart/pause and ?camera= view deep links; data-scene-ready identifies the loaded vehicle; why: sandbox timing is slow and later checks must reuse deterministic driving controls.
+- Google Maps/Street View are standalone views, never driven by vehicle physics or composited beneath the car/HUD, and skip sandbox/credential-bearing hosts; why: keep Google imagery/attribution intact and avoid unsupported validation requests.
+- Vehicle rendering batches normalized cloned GLB geometry by material, uses the mobile MPV asset, and keeps camera-look input outside React; why: shared models remain unmodified and touch rotation avoids per-frame rerenders.

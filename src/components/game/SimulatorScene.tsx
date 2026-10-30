@@ -3,17 +3,18 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { Environment, Lightformer } from "@react-three/drei";
 import * as THREE from "three";
 import { makeDrivingPhysics, trackPoint, type DrivingInput } from "@/game/simulator-physics";
-import { clearDriveInput, driveInput, useSimulator, type CameraView } from "@/game/simulator-store";
+import { CAMERA_VIEWS, clearDriveInput, driveInput, useSimulator, type CameraView } from "@/game/simulator-store";
+import { cameraLook, isInteriorCamera, isPortraitBlinking } from "@/game/simulator-vehicles";
 import { readDrivingInput } from "@/game/simulator-input";
 import type { SimulatorTheme } from "@/game/simulator-theme";
 import { audio } from "@/game/audio";
 import { SimulatorWorld, Woodland } from "./SimulatorWorld";
-import { PersonalizedSedan, Sedan } from "./SimulatorCar";
+import { PersonalizedVehicle, Sedan } from "./SimulatorCar";
 
 type DebugGame = { readonly state: Record<string, unknown>; input: typeof driveInput; sim: (seconds: number) => void; camera: (view: CameraView) => void; start: () => void; restart: () => void; pause: () => void };
 declare global { interface Window { __game?: DebugGame } }
 
-export function SimulatorScene({ theme, music, muted, onReady }: { theme: SimulatorTheme; music: boolean; muted: boolean; onReady: () => void }) {
+export function SimulatorScene({ theme, music, muted, active, onReady }: { theme: SimulatorTheme; music: boolean; muted: boolean; active: boolean; onReady: () => void }) {
   const { camera, gl } = useThree();
   const physics = useMemo(() => makeDrivingPhysics(), []);
   const player = useRef<THREE.Group>(null);
@@ -21,6 +22,10 @@ export function SimulatorScene({ theme, music, muted, onReady }: { theme: Simula
   const keys = useRef(new Set<string>());
   const time = useRef(0); const hud = useRef(0); const lastRun = useRef(-1); const impactTime = useRef(0); const ready = useRef(false);
   const cameraView = useSimulator((s) => s.camera);
+  const vehicle = useSimulator((s) => s.vehicle);
+  const vehicleModel = useRef<THREE.Group>(null);
+  const readyVehicle = useRef<string | null>(null);
+  const cameraState = useRef("");
   const temp = useMemo(() => ({ position: new THREE.Vector3(), target: new THREE.Vector3(), offset: new THREE.Vector3(), look: new THREE.Vector3(), quaternion: new THREE.Quaternion() }), []);
   const telemetry = useRef({ speed: 0, distance: 0, driftScore: 0, slip: 0, steering: 0, offroad: false, yaw: 0 });
 
@@ -48,7 +53,7 @@ export function SimulatorScene({ theme, music, muted, onReady }: { theme: Simula
     physics.body.addEventListener("collide", collision);
     if (import.meta.env.DEV) {
       const params = new URLSearchParams(window.location.search); const view = params.get("camera");
-      if (["Chase", "Driver", "Cabin", "Hood", "Aerial", "Front"].includes(view ?? "")) useSimulator.getState().setCamera(view as CameraView);
+      if (CAMERA_VIEWS.some((camera) => camera === view)) useSimulator.getState().setCamera(view as CameraView);
       window.__game = {
         get state() { return { ...useSimulator.getState(), position: { x: physics.body.position.x, y: physics.body.position.y, z: physics.body.position.z } }; },
         input: driveInput,
@@ -60,20 +65,32 @@ export function SimulatorScene({ theme, music, muted, onReady }: { theme: Simula
   }, [physics]);
 
   useFrame((_, raw) => {
+    if (!active) return;
     const dt = Math.min(raw, 0.05); const state = useSimulator.getState(); const input = readDrivingInput(keys.current, driveInput, state.mode === "Drift");
     if (state.state === "driving") { advance(dt, input); audio.updateEngine(telemetry.current.speed, input.throttle); hud.current += dt; if (hud.current >= 0.12) { hud.current = 0; publish(); } }
     else if (state.state === "ready") { physics.step({ throttle: false, brake: true, steer: 0, handbrake: false, drift: false }, dt); }
     const b = physics.body;
+    const blink = isPortraitBlinking(time.current);
+    for (const name of ["driver", "rear"]) { const eyes = vehicleModel.current?.getObjectByName(`portrait-blink-${name}`); if (eyes) eyes.visible = blink; }
     if (player.current) { player.current.position.set(b.position.x, b.position.y - 0.58, b.position.z); player.current.quaternion.set(b.quaternion.x, b.quaternion.y, b.quaternion.z, b.quaternion.w); }
     physics.traffic.forEach((body, i) => { const group = cars.current[i]; if (!group) return; group.position.set(body.position.x, 0, body.position.z); group.quaternion.set(body.quaternion.x, body.quaternion.y, body.quaternion.z, body.quaternion.w); });
     temp.position.set(b.position.x, b.position.y - 0.58, b.position.z); temp.quaternion.set(b.quaternion.x, b.quaternion.y, b.quaternion.z, b.quaternion.w);
-    const offsets: Record<CameraView, [number, number, number]> = { Chase: [0.4, 3.0, 7.3], Driver: [0.48, 1.35, -0.18], Cabin: [-0.48, 1.34, -0.05], Hood: [0, 1.25, -1.9], Aerial: [0, 30, 12], Front: [4.2, 1.9, -6.9] };
+    const offsets: Record<CameraView, [number, number, number]> = { Chase: [0.4, 3.0, 7.3], Driver: [vehicle === "mpv" ? -0.44 : 0.48, vehicle === "mpv" ? 1.4 : 1.35, -0.35], Cabin: [vehicle === "mpv" ? 0.44 : -0.48, 1.38, -0.05], "Rear seat": [0, 1.39, 1.4], Hood: [0, 1.25, -1.9], Aerial: [0, 30, 12], Front: [4.2, 1.9, -6.9], "Orbit 360": [0, 2.7, cameraLook.distance] };
+    const inside = isInteriorCamera(state.camera);
     temp.offset.set(...offsets[state.camera]).applyQuaternion(temp.quaternion).add(temp.position);
-    const inside = state.camera === "Driver" || state.camera === "Cabin";
-    if (inside || state.camera === "Hood") camera.position.copy(temp.offset); else camera.position.lerp(temp.offset, 1 - Math.exp(-5 * dt));
-    temp.target.set(0, inside ? 1.0 : 0.9, state.camera === "Front" ? 0 : -8).applyQuaternion(temp.quaternion).add(temp.position);
+    if (state.camera === "Orbit 360") {
+      temp.offset.set(Math.sin(cameraLook.yaw) * Math.cos(cameraLook.pitch) * cameraLook.distance, 1.0 + Math.sin(cameraLook.pitch + 0.28) * cameraLook.distance, Math.cos(cameraLook.yaw) * Math.cos(cameraLook.pitch) * cameraLook.distance).applyQuaternion(temp.quaternion).add(temp.position);
+      temp.offset.y = Math.max(0.45, temp.offset.y);
+    }
+    const cameraKey = `${state.camera}:${state.vehicle}:${state.runId}`;
+    if (inside || state.camera === "Hood" || cameraState.current !== cameraKey) camera.position.copy(temp.offset); else camera.position.lerp(temp.offset, 1 - Math.exp(-5 * dt));
+    cameraState.current = cameraKey;
+    if (inside) {
+      temp.look.set(-Math.sin(cameraLook.yaw) * Math.cos(cameraLook.pitch), -Math.sin(cameraLook.pitch), -Math.cos(cameraLook.yaw) * Math.cos(cameraLook.pitch)).applyQuaternion(temp.quaternion);
+      temp.target.copy(camera.position).add(temp.look);
+    } else temp.target.set(0, 0.9, state.camera === "Front" || state.camera === "Orbit 360" ? 0 : -8).applyQuaternion(temp.quaternion).add(temp.position);
     camera.lookAt(temp.target);
-    if (!ready.current && player.current?.children.length) { ready.current = true; requestAnimationFrame(() => { gl.domElement.closest(".simulator")?.setAttribute("data-scene-ready", "true"); onReady(); }); }
+    if (vehicleModel.current?.children.length && (!ready.current || readyVehicle.current !== state.vehicle)) { ready.current = true; readyVehicle.current = state.vehicle; requestAnimationFrame(() => { gl.domElement.closest(".simulator")?.setAttribute("data-scene-ready", state.vehicle); onReady(); }); }
   });
   return <>
     <color attach="background" args={[theme.sky]} /><fog attach="fog" args={[theme.fog, 70, 310]} />
@@ -82,7 +99,8 @@ export function SimulatorScene({ theme, music, muted, onReady }: { theme: Simula
     <Environment resolution={64}><Lightformer intensity={3} position={[0, 12, 0]} rotation-x={-Math.PI / 2} scale={[25, 25, 1]} color={theme.light} /><Lightformer intensity={2} position={[15, 5, 0]} rotation-y={Math.PI / 2} scale={[25, 6, 1]} color={theme.sky} /></Environment>
     <SimulatorWorld theme={theme} />
     <Suspense fallback={null}><Woodland theme={theme} /></Suspense>
-    <Suspense fallback={null}><group ref={player}><PersonalizedSedan theme={theme} cabin={cameraView === "Driver" || cameraView === "Cabin"} driverView={cameraView === "Driver"} music={music} muted={muted} /></group>
+    <group ref={player}><Suspense fallback={null}><group key={vehicle} ref={vehicleModel}><PersonalizedVehicle theme={theme} vehicle={vehicle} cabin={isInteriorCamera(cameraView)} driverView={cameraView === "Driver"} music={music} muted={muted} active={active} /></group></Suspense></group>
+    <Suspense fallback={null}>
       {physics.traffic.map((_, i) => <group key={i} ref={(group) => { cars.current[i] = group; }}><Sedan theme={theme} color={i % 2 ? theme.tail : theme.light} /></group>)}
     </Suspense>
   </>;

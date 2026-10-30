@@ -3,8 +3,36 @@ import { DEFAULT_MUSIC, FIRST_VIDEO, nextTrack, parseYouTubeLink } from "@/game/
 import { makeDrivingPhysics, roadOffset } from "@/game/simulator-physics";
 import { CAMERA_VIEWS, useSimulator } from "@/game/simulator-store";
 import { readDrivingInput } from "@/game/simulator-input";
+import { adjustCameraLook, cameraLook, isInteriorCamera, resetCameraLook, VEHICLES } from "@/game/simulator-vehicles";
+import { STREET_START, canRenderGoogleMaps } from "@/game/simulator-location";
 
 describe("Personalized simulator", () => {
+  it("starts with the family MPV and allows luxury vehicle exchange with a fresh run", () => {
+    expect(VEHICLES.map((v) => v.id)).toEqual(["mpv", "luxury"]);
+    useSimulator.setState({ vehicle: "mpv", runId: 10, speed: 30, distance: 150 });
+    expect(useSimulator.getState().vehicle).toBe("mpv");
+    useSimulator.getState().setVehicle("luxury");
+    expect(useSimulator.getState().vehicle).toBe("luxury"); expect(useSimulator.getState().runId).toBe(11);
+    expect(useSimulator.getState().speed).toBe(0); expect(useSimulator.getState().distance).toBe(0);
+    useSimulator.getState().setVehicle("mpv");
+  });
+  it("keeps the user's exact Google start location and panorama", () => {
+    expect(STREET_START.position).toEqual({ lat: 25.4290781, lng: 81.9138727 });
+    expect(STREET_START.pano).toBe("LQiadkCkvnZ9-7CjwRK4IQ");
+    expect(STREET_START.pov).toEqual({ heading: 90.42963437957803, pitch: 14.849397644948823 });
+  });
+  it("supports full horizontal 360 looking and rear-seat cabin view", () => {
+    resetCameraLook(); adjustCameraLook(400, 400);
+    expect(cameraLook.yaw).toBeCloseTo(2 * Math.PI - 2); expect(cameraLook.pitch).toBe(1.1);
+    expect(CAMERA_VIEWS).toContain("Rear seat"); expect(CAMERA_VIEWS).toContain("Orbit 360");
+    expect(isInteriorCamera("Rear seat")).toBe(true); expect(isInteriorCamera("Orbit 360")).toBe(false);
+    resetCameraLook(); expect(cameraLook.yaw).toBe(0); expect(cameraLook.pitch).toBe(0);
+  });
+  it("never loads Maps in the sandbox or credential-bearing preview hostnames", () => {
+    expect(canRenderGoogleMaps("localhost")).toBe(false);
+    expect(canRenderGoogleMaps("a-devserver-key.lovableproject.com")).toBe(false);
+    expect(canRenderGoogleMaps("tesla-game.lovable.app")).toBe(true);
+  });
   it("starts music with the user's exact requested video", () => {
     expect(FIRST_VIDEO).toBe("vf-XIsSWiGA");
     expect(DEFAULT_MUSIC[0]).toBe("vf-XIsSWiGA");

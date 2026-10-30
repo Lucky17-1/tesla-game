@@ -1,3 +1,4 @@
+/// <reference types="google.maps" />
 import { useEffect, useRef, useState } from "react";
 import { ArrowUpRight, MapPin, Navigation, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -6,19 +7,21 @@ import { canRenderGoogleMaps, GOOGLE_MAPS_LINK, STREET_START } from "@/game/simu
 declare global { interface Window { deshmukhMapsReady?: () => void } }
 let mapsLoading: Promise<void> | undefined;
 function loadMaps() {
-  if (window.google?.maps?.StreetViewPanorama) return Promise.resolve();
+  if (typeof google !== "undefined" && google.maps?.StreetViewPanorama) return Promise.resolve();
   if (mapsLoading) return mapsLoading;
   mapsLoading = new Promise<void>((resolve, reject) => {
     const key = import.meta.env['VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY'];
     if (!key) { reject(new Error("Google Maps is not connected.")); return; }
-    window.deshmukhMapsReady = () => resolve();
+    const timeout = setTimeout(() => { script.remove(); reject(new Error("Google Maps loading timed out. Try again.")); }, 20000);
+    window.deshmukhMapsReady = () => { clearTimeout(timeout); resolve(); };
     const script = document.createElement("script");
     const channel = import.meta.env['VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_TRACKING_ID'] || "gmp_lovable_agentskills_v1";
     script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&loading=async&callback=deshmukhMapsReady&channel=${encodeURIComponent(channel)}&language=en&region=IN`;
     script.async = true;
-    script.onerror = () => { mapsLoading = undefined; script.remove(); reject(new Error("Google Maps could not load. Check your connection.")); };
+    script.onerror = () => { clearTimeout(timeout); script.remove(); reject(new Error("Google Maps could not load. Check your connection.")); };
     document.head.appendChild(script);
   });
+  mapsLoading = mapsLoading.catch((error: unknown) => { mapsLoading = undefined; throw error; });
   return mapsLoading;
 }
 
@@ -33,18 +36,21 @@ export function SimulatorMaps({ view }: { view: "street" | "map" }) {
     if (!canRenderGoogleMaps(window.location.hostname)) { setStatus("Google Maps is available on your published Lovable address."); return; }
     let active = true;
     let instance: google.maps.StreetViewPanorama | google.maps.Map | undefined;
+    let marker: google.maps.Marker | undefined;
     let timer: ReturnType<typeof setTimeout> | undefined;
     setStatus("Loading Google Maps…");
     void loadMaps().then(() => {
       if (!active || !host.current) return;
+      timer = setTimeout(() => { if (active) setStatus("Google Maps has not loaded. Check connection or website authorization."); }, 20000);
       if (view === "street") {
         // Source: Google Maps Platform Code Assist
-        const p = new google.maps.StreetViewPanorama(host.current, {
+        const options: google.maps.StreetViewPanoramaOptions & { internalUsageAttributionIds: string[] } = {
           pano: STREET_START.pano, pov: STREET_START.pov, visible: true,
           motionTracking: false, motionTrackingControl: true, fullscreenControl: true,
           addressControl: true, linksControl: true, panControl: true, zoomControl: true,
-          enableCloseButton: false,
-        });
+          enableCloseButton: false, internalUsageAttributionIds: ["gmp_lovable_agentskills_v1"],
+        };
+        const p = new google.maps.StreetViewPanorama(host.current, options);
         instance = p; panorama.current = p;
         const inspectStatus = () => {
           if (!active) return;
@@ -63,14 +69,14 @@ export function SimulatorMaps({ view }: { view: "street" | "map" }) {
           gestureHandling: "greedy", internalUsageAttributionIds: ["gmp_lovable_agentskills_v1"],
         });
         instance = m; map.current = m;
-        new google.maps.Marker({ map: m, position: STREET_START.position, title: "Deshmukh start location" });
+        marker = new google.maps.Marker({ map: m, position: STREET_START.position, title: "Deshmukh start location" });
         m.addListener("tilesloaded", () => { if (active) { setStatus(""); if (timer) clearTimeout(timer); } });
       }
-      timer = setTimeout(() => { if (active) setStatus("Google Maps has not loaded. Check connection or website authorization."); }, 20000);
     }).catch((error: unknown) => { if (active) setStatus(error instanceof Error ? error.message : "Google Maps could not load."); });
     return () => {
       active = false; if (timer) clearTimeout(timer);
       if (instance) google.maps.event.clearInstanceListeners(instance);
+      marker?.setMap(null);
       panorama.current?.setVisible(false); panorama.current = null; map.current = null;
     };
   }, [view, attempt]);
