@@ -10,7 +10,7 @@ import type { SimulatorTheme } from "@/game/simulator-theme";
 import { SimulatorMusic } from "./SimulatorMusic";
 
 /** Bake normalization into cloned geometry, then batch by material to keep phones affordable. */
-function VehicleModel({ theme, vehicle, color, cabin = false }: { theme: SimulatorTheme; vehicle: VehicleId; color?: string; cabin?: boolean }) {
+function VehicleModel({ theme, vehicle, color, cabin = false }: { theme: SimulatorTheme; vehicle: VehicleId; color?: string | undefined; cabin?: boolean }) {
   const gltf = useGLTF(vehicle === "mpv" ? mpv.url : sedan.url);
   const model = useMemo(() => {
     const source = gltf.scene.clone(true);
@@ -39,7 +39,7 @@ function VehicleModel({ theme, vehicle, color, cabin = false }: { theme: Simulat
       const geometry = node.geometry.clone().applyMatrix4(node.matrixWorld);
       for (const key of Object.keys(geometry.attributes)) if (key !== "position" && key !== "normal") geometry.deleteAttribute(key);
       if (!geometry.getAttribute("normal")) geometry.computeVertexNormals();
-      geometry.setIndex(geometry.index); batch.geometries.push(geometry);
+      batch.geometries.push(geometry);
     });
     const group = new THREE.Group();
     for (const batch of batches.values()) {
