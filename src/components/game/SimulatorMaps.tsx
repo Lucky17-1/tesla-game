@@ -44,12 +44,13 @@ export function SimulatorMaps({ view }: { view: "street" | "map" }) {
       timer = setTimeout(() => { if (active) setStatus("Google Maps has not loaded. Check connection or website authorization."); }, 20000);
       if (view === "street") {
         // Source: Google Maps Platform Code Assist
-        const p = new google.maps.StreetViewPanorama(host.current, {
+        const options: google.maps.StreetViewPanoramaOptions & { internalUsageAttributionIds: string[] } = {
           pano: STREET_START.pano, pov: STREET_START.pov, visible: true,
           motionTracking: false, motionTrackingControl: true, fullscreenControl: true,
           addressControl: true, linksControl: true, panControl: true, zoomControl: true,
           enableCloseButton: false, internalUsageAttributionIds: ["gmp_lovable_agentskills_v1"],
-        });
+        };
+        const p = new google.maps.StreetViewPanorama(host.current, options);
         instance = p; panorama.current = p;
         const inspectStatus = () => {
           if (!active) return;
