@@ -5,6 +5,8 @@ import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import sedan from "@/assets/simulator/sedan.glb.asset.json";
 import mpv from "@/assets/simulator/mpv-mobile.glb.asset.json";
 import face from "@/assets/simulator/driver-face.jpg.asset.json";
+import boyFace from "@/assets/simulator/driver-boy.jpg.asset.json";
+import girlFace from "@/assets/simulator/passenger-girl.jpg.asset.json";
 import { getVehicle, type VehicleId } from "@/game/simulator-vehicles";
 import type { SimulatorTheme } from "@/game/simulator-theme";
 import { SimulatorMusic } from "./SimulatorMusic";
@@ -29,7 +31,7 @@ function VehicleModel({ theme, vehicle, color, cabin = false }: { theme: Simulat
       let batch = batches.get(name);
       if (!batch) {
         const material = sourceMaterial.clone();
-        if (["paint", "blue", "white"].includes(name)) { material.color.set(color ?? (vehicle === "mpv" ? theme.seat : theme.paint)); material.metalness = 0.55; material.roughness = 0.28; }
+        if (["paint", "blue", "white"].includes(name)) { material.color.set(color ?? (vehicle === "mpv" ? theme.carens : theme.paint)); material.metalness = 0.55; material.roughness = 0.28; }
         if (name.includes("glass")) {
           material.color.set(theme.glass); material.transparent = true; material.opacity = cabin ? 0.1 : 0.25; material.depthWrite = false; material.roughness = 0.1; material.side = THREE.DoubleSide;
           if (material instanceof THREE.MeshPhysicalMaterial) material.transmission = 0;
@@ -67,8 +69,8 @@ function Plate({ theme, vehicle }: { theme: SimulatorTheme; vehicle: VehicleId }
 }
 
 /** Photo-referenced seated avatar, not a reconstructed 3D scan. Blink meshes are driven by the scene stepper. */
-function Occupant({ theme, position, name, visible = true }: { theme: SimulatorTheme; position: [number, number, number]; name: string; visible?: boolean }) {
-  const portrait = useTexture(face.url);
+function Occupant({ theme, position, name, visible = true, photo = face.url }: { theme: SimulatorTheme; position: [number, number, number]; name: string; visible?: boolean; photo?: string }) {
+  const portrait = useTexture(photo);
   useEffect(() => { portrait.colorSpace = THREE.SRGBColorSpace; }, [portrait]);
   return <group position={position} visible={visible}>
     <mesh position={[0, 0.92, 0.05]}><capsuleGeometry args={[0.17, 0.26, 4, 10]} /><meshStandardMaterial color={theme.trim} roughness={0.9} /></mesh>
@@ -105,8 +107,9 @@ export function PersonalizedVehicle({ theme, vehicle, cabin, driverView, music, 
     <VehicleModel theme={theme} vehicle={vehicle} cabin={cabin} />
     <Plate theme={theme} vehicle={vehicle} />
     {vehicle === "luxury" && <SedanCabin theme={theme} />}
-    <Occupant theme={theme} position={[vehicle === "mpv" ? -0.44 : 0.47, 0, 0.02]} name="driver" visible={!driverView} />
-    <Occupant theme={theme} position={[0.44, 0, vehicle === "mpv" ? 0.98 : 1.12]} name="rear" />
+    <Occupant theme={theme} position={[vehicle === "mpv" ? -0.44 : 0.47, 0, 0.02]} name="driver" visible={!driverView} photo={boyFace.url} />
+    <Occupant theme={theme} position={[vehicle === "mpv" ? 0.44 : -0.47, 0, 0.02]} name="passenger" photo={girlFace.url} />
+    <Occupant theme={theme} position={[vehicle === "mpv" ? -0.44 : 0.44, 0, vehicle === "mpv" ? 0.98 : 1.12]} name="rear" />
     <Html transform position={[vehicle === "mpv" ? 0 : -0.16, vehicle === "mpv" ? 1.12 : 1.02, vehicle === "mpv" ? -1.04 : -0.73]} distanceFactor={0.58} zIndexRange={[20, 10]} className={cabin && active ? "sim-tv-visible" : "sim-tv-hidden"}>
       <SimulatorMusic enabled={music} muted={muted} />
     </Html>

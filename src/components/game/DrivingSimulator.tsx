@@ -23,6 +23,7 @@ export function DrivingSimulator() {
   const [webgl, setWebgl] = useState(true); const [ready, setReady] = useState(false);
   const [expanded, setExpanded] = useState(false); const [fallbackFull, setFallbackFull] = useState(false);
   const [muted, setMuted] = useState(false); const [musicMuted, setMusicMuted] = useState(false); const [music, setMusic] = useState(false); const [musicPanel, setMusicPanel] = useState(false);
+  const [lowPower, setLowPower] = useState(false);
   const [view, setView] = useState<"drive" | "street" | "map">("drive");
   const dragging = useRef<{ id: number; x: number; y: number } | null>(null);
   const state = useSimulator((s) => s.state);
@@ -30,7 +31,8 @@ export function DrivingSimulator() {
   const camera = useSimulator((s) => s.camera);
   useEffect(() => {
     setTheme(getSimulatorTheme()); setMuted(audio.isMuted);
-    try { const canvas = document.createElement("canvas"); const ctx = canvas.getContext("webgl2"); setWebgl(Boolean(ctx)); ctx?.getExtension("WEBGL_lose_context")?.loseContext(); } catch { setWebgl(false); }
+    setLowPower(window.matchMedia("(pointer: coarse)").matches || window.innerWidth < 900 || (navigator.hardwareConcurrency ?? 8) <= 4);
+    try { const canvas = document.createElement("canvas"); const ctx = canvas.getContext("webgl2") ?? canvas.getContext("webgl"); setWebgl(Boolean(ctx)); ctx?.getExtension("WEBGL_lose_context")?.loseContext(); } catch { setWebgl(false); }
     try { const best = Number(localStorage.getItem("deshmukh-drift-best")); if (Number.isFinite(best) && best > 0) useSimulator.setState({ best }); } catch { /* storage optional */ }
     const full = () => setExpanded(Boolean(document.fullscreenElement));
     document.addEventListener("fullscreenchange", full);
@@ -70,7 +72,7 @@ export function DrivingSimulator() {
       onPointerMove={(e) => { const p = dragging.current; if (!p || p.id !== e.pointerId) return; adjustCameraLook(e.clientX - p.x, e.clientY - p.y); p.x = e.clientX; p.y = e.clientY; }}
       onPointerUp={() => { dragging.current = null; }} onPointerCancel={() => { dragging.current = null; }} onLostPointerCapture={() => { dragging.current = null; }}
       onWheel={(e) => { if (camera === "Orbit 360" && e.target instanceof HTMLCanvasElement) cameraLook.distance = Math.max(4, Math.min(16, cameraLook.distance + e.deltaY * 0.008)); }}>
-    {theme && <Canvas shadows dpr={[1, 1.25]} frameloop={view === "drive" ? "always" : "never"} camera={{ position: [3, 3.5, 8], fov: 60, near: 0.07, far: 900 }} gl={{ antialias: true, powerPreference: "high-performance" }}>
+    {theme && <Canvas shadows={!lowPower} dpr={lowPower ? 1 : [1, 1.25]} frameloop={view === "drive" ? "always" : "never"} camera={{ position: [3, 3.5, 8], fov: 60, near: 0.07, far: 900 }} gl={{ antialias: !lowPower, powerPreference: lowPower ? "default" : "high-performance", failIfMajorPerformanceCaveat: false }}>
       <SimulatorScene theme={theme} music={music} muted={muted || musicMuted} active={view === "drive"} onReady={() => setReady(true)} />
     </Canvas>}
     <SimulatorHUD ready={ready} expanded={expanded || fallbackFull} onFullscreen={() => { void fullscreen(); }} onStart={begin} muted={muted} onMute={() => setMuted(audio.toggleMute())} onMusic={() => { setMusicPanel((v) => !v); useSimulator.getState().setCamera("Cabin"); }} />
