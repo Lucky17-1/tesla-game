@@ -17,7 +17,7 @@ export const SITE = {
    * Leave empty until you have been approved and configured real ad units.
    * While empty, ad slots render nothing anywhere on the site.
    */
-  adsenseClient: "",
+  adsenseClient: "ca-pub-3299604176921701",
   /**
    * Absolute site URL once you publish on a custom domain
    * (e.g. "https://voltedge.com"). Used for the sitemap and canonical
