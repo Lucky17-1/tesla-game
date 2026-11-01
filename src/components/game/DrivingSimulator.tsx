@@ -7,8 +7,9 @@ import { MusicPanel } from "./SimulatorMusic";
 import { getSimulatorTheme, type SimulatorTheme } from "@/game/simulator-theme";
 import { clearDriveInput, useSimulator } from "@/game/simulator-store";
 import { audio } from "@/game/audio";
-import { CarFront, Map, MapPin, RotateCcw } from "lucide-react";
+import { CarFront, Map, MapPin, RotateCcw, Users } from "lucide-react";
 import { SimulatorMaps } from "./SimulatorMaps";
+import { RidersPanel } from "./RidersPanel";
 import { adjustCameraLook, cameraLook, isInteriorCamera, resetCameraLook } from "@/game/simulator-vehicles";
 
 class SceneBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
@@ -24,7 +25,7 @@ export function DrivingSimulator() {
   const [expanded, setExpanded] = useState(false); const [fallbackFull, setFallbackFull] = useState(false);
   const [muted, setMuted] = useState(false); const [musicMuted, setMusicMuted] = useState(false); const [music, setMusic] = useState(false); const [musicPanel, setMusicPanel] = useState(false);
   const [lowPower, setLowPower] = useState(false);
-  const [view, setView] = useState<"drive" | "street" | "map">("drive");
+  const [view, setView] = useState<"drive" | "street" | "map" | "riders">("drive");
   const dragging = useRef<{ id: number; x: number; y: number } | null>(null);
   const state = useSimulator((s) => s.state);
   const vehicle = useSimulator((s) => s.vehicle);
@@ -64,7 +65,7 @@ export function DrivingSimulator() {
   if (!webgl) return <div className="flex min-h-96 items-center justify-center p-6 text-center text-muted-foreground">This device does not support the 3D driving scene. Open it in a WebGL-enabled browser.</div>;
   return <SceneBoundary><div ref={wrapper} className={`simulator ${fallbackFull ? "sim-expanded" : ""}`}>
     <nav aria-label="Simulator views" className="sim-view-tabs">
-      <div className="flex min-w-0 gap-1">{([{ id: "drive", label: "Driving", icon: CarFront }, { id: "street", label: "Street View", icon: MapPin }, { id: "map", label: "Map", icon: Map }] as const).map((item) => <Button key={item.id} size="sm" variant={view === item.id ? "secondary" : "ghost"} aria-pressed={view === item.id} onClick={() => changeView(item.id)} className="px-2 text-xs sm:px-3"><item.icon className="size-4" />{item.label}</Button>)}</div>
+      <div className="flex min-w-0 gap-1">{([{ id: "drive", label: "Driving", icon: CarFront }, { id: "street", label: "Street View", icon: MapPin }, { id: "map", label: "Map", icon: Map }, { id: "riders", label: "Riders", icon: Users }] as const).map((item) => <Button key={item.id} size="sm" variant={view === item.id ? "secondary" : "ghost"} aria-pressed={view === item.id} onClick={() => changeView(item.id)} className="px-2 text-xs sm:px-3"><item.icon className="size-4" />{item.label}</Button>)}</div>
       {view === "drive" && canLook && <Button variant="ghost" size="icon" aria-label="Reset camera look" title="Reset camera look" onClick={resetCameraLook}><RotateCcw /></Button>}
     </nav>
     <div className={`sim-driving-view ${view === "drive" ? "" : "sim-view-hidden"}`} aria-hidden={view !== "drive"}
@@ -78,6 +79,7 @@ export function DrivingSimulator() {
     <SimulatorHUD ready={ready} expanded={expanded || fallbackFull} onFullscreen={() => { void fullscreen(); }} onStart={begin} muted={muted} onMute={() => setMuted(audio.toggleMute())} onMusic={() => { setMusicPanel((v) => !v); useSimulator.getState().setCamera("Cabin"); }} />
     {musicPanel && <MusicPanel onClose={() => setMusicPanel(false)} muted={musicMuted} onMute={() => setMusicMuted((v) => !v)} />}
     </div>
-    {view !== "drive" && <SimulatorMaps key={view} view={view} />}
+    {(view === "street" || view === "map") && <SimulatorMaps key={view} view={view} />}
+    {view === "riders" && <RidersPanel />}
   </div></SceneBoundary>;
 }

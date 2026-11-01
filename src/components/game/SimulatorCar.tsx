@@ -1,3 +1,4 @@
+import { assetUrl } from "@/lib/asset-url";
 import { useEffect, useMemo } from "react";
 import { Html, useGLTF, useTexture } from "@react-three/drei";
 import * as THREE from "three";
@@ -13,7 +14,7 @@ import { SimulatorMusic } from "./SimulatorMusic";
 
 /** Bake normalization into cloned geometry, then batch by material to keep phones affordable. */
 function VehicleModel({ theme, vehicle, color, cabin = false }: { theme: SimulatorTheme; vehicle: VehicleId; color?: string | undefined; cabin?: boolean }) {
-  const gltf = useGLTF(vehicle === "mpv" ? mpv.url : sedan.url);
+  const gltf = useGLTF(vehicle === "mpv" ? assetUrl(mpv.url) : assetUrl(sedan.url));
   const model = useMemo(() => {
     const source = gltf.scene.clone(true);
     const normalized = new THREE.Group(); normalized.rotation.y = vehicle === "mpv" ? -Math.PI / 2 : Math.PI; normalized.add(source); normalized.updateMatrixWorld(true);
@@ -69,7 +70,7 @@ function Plate({ theme, vehicle }: { theme: SimulatorTheme; vehicle: VehicleId }
 }
 
 /** Photo-referenced seated avatar, not a reconstructed 3D scan. Blink meshes are driven by the scene stepper. */
-function Occupant({ theme, position, name, visible = true, photo = face.url }: { theme: SimulatorTheme; position: [number, number, number]; name: string; visible?: boolean; photo?: string }) {
+function Occupant({ theme, position, name, visible = true, photo = assetUrl(face.url) }: { theme: SimulatorTheme; position: [number, number, number]; name: string; visible?: boolean; photo?: string }) {
   const portrait = useTexture(photo);
   useEffect(() => { portrait.colorSpace = THREE.SRGBColorSpace; }, [portrait]);
   return <group position={position} visible={visible}>
@@ -107,8 +108,8 @@ export function PersonalizedVehicle({ theme, vehicle, cabin, driverView, music, 
     <VehicleModel theme={theme} vehicle={vehicle} cabin={cabin} />
     <Plate theme={theme} vehicle={vehicle} />
     {vehicle === "luxury" && <SedanCabin theme={theme} />}
-    <Occupant theme={theme} position={[vehicle === "mpv" ? -0.44 : 0.47, 0, 0.02]} name="driver" visible={!driverView} photo={boyFace.url} />
-    <Occupant theme={theme} position={[vehicle === "mpv" ? 0.44 : -0.47, 0, 0.02]} name="passenger" photo={girlFace.url} />
+    <Occupant theme={theme} position={[vehicle === "mpv" ? -0.44 : 0.47, 0, 0.02]} name="driver" visible={!driverView} photo={assetUrl(boyFace.url)} />
+    <Occupant theme={theme} position={[vehicle === "mpv" ? 0.44 : -0.47, 0, 0.02]} name="passenger" photo={assetUrl(girlFace.url)} />
     <Occupant theme={theme} position={[vehicle === "mpv" ? -0.44 : 0.44, 0, vehicle === "mpv" ? 0.98 : 1.12]} name="rear" />
     <Html transform position={[vehicle === "mpv" ? 0 : -0.16, vehicle === "mpv" ? 1.12 : 1.02, vehicle === "mpv" ? -1.04 : -0.73]} distanceFactor={0.58} zIndexRange={[20, 10]} className={cabin && active ? "sim-tv-visible" : "sim-tv-hidden"}>
       <SimulatorMusic enabled={music} muted={muted} />

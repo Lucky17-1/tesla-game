@@ -1,3 +1,4 @@
+import { assetUrl } from "@/lib/asset-url";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, Environment, Lightformer, Sky } from "@react-three/drei";
 import { Component, Suspense, useEffect, useRef, useState, type ReactNode } from "react";
@@ -92,7 +93,7 @@ export default function CarViewer() {
       {view !== "rear" && <ViewerBoundary><Canvas key={`${view}-${cameraKey}`} shadows dpr={[1, 1.5]} camera={view === "interior" ? { position: [0, 1.6, 1], fov: 66 } : { position: [6.4, 3.1, -7.2], fov: 39 }} onCreated={({ camera }) => { if (view === "interior") camera.lookAt(0, 1.2, -60); }}>
         <ViewerScene interior={view === "interior"} running={running} doorsOpen={doorsOpen} />
       </Canvas></ViewerBoundary>}
-      {view === "rear" && <img src={rearSeats.url} alt="Tesla white leather rear seats and center armrest" className="absolute inset-0 h-full w-full object-cover" />}
+      {view === "rear" && <img src={assetUrl(rearSeats.url)} alt="Tesla white leather rear seats and center armrest" className="absolute inset-0 h-full w-full object-cover" />}
       {view === "interior" && <>
         <img src={cockpit} alt="Deshmukh in the Tesla-style driver seat, one hand on the steering wheel and the other reaching for the screen" className="pointer-events-none absolute inset-0 h-full w-full object-fill" />
         <Button onClick={() => setVideoOpen(true)} aria-label="Play Aaj Ki Raat on car screen" title="Aaj Ki Raat" className="vehicle-screen absolute flex flex-col gap-1 bg-vehicle-screen text-vehicle-light hover:bg-vehicle-screen">

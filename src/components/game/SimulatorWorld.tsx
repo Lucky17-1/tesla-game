@@ -1,3 +1,4 @@
+import { assetUrl } from "@/lib/asset-url";
 import { useLayoutEffect, useMemo } from "react";
 import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
@@ -48,7 +49,7 @@ export function SimulatorWorld({ theme }: { theme: SimulatorTheme }) {
 }
 
 export function Woodland({ theme }: { theme: SimulatorTheme }) {
-  const oakModel = useGLTF(oak.url); const pineModel = useGLTF(pine.url);
+  const oakModel = useGLTF(assetUrl(oak.url)); const pineModel = useGLTF(assetUrl(pine.url));
   const parts = useMemo(() => {
     const result: { geometry: THREE.BufferGeometry; material: THREE.Material | THREE.Material[]; matrices: THREE.Matrix4[] }[] = [];
     for (const [kind, source] of [oakModel.scene, pineModel.scene].entries()) {
