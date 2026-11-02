@@ -34,7 +34,7 @@ export function DrivingSimulator() {
     setTheme(getSimulatorTheme()); setMuted(audio.isMuted);
     setLowPower(window.matchMedia("(pointer: coarse)").matches || window.innerWidth < 900 || (navigator.hardwareConcurrency ?? 8) <= 4);
     try { const canvas = document.createElement("canvas"); const ctx = canvas.getContext("webgl2") ?? canvas.getContext("webgl"); setWebgl(Boolean(ctx)); ctx?.getExtension("WEBGL_lose_context")?.loseContext(); } catch { setWebgl(false); }
-    try { const best = Number(localStorage.getItem("deshmukh-drift-best")); if (Number.isFinite(best) && best > 0) useSimulator.setState({ best }); } catch { /* storage optional */ }
+    try { const best = Number(localStorage.getItem("deshmukh-drift-best")); if (Number.isFinite(best) && best > 0) useSimulator.setState({ best }); const bestTime = Number(localStorage.getItem("deshmukh-race-best")); if (Number.isFinite(bestTime) && bestTime > 0) useSimulator.setState({ bestTime }); } catch { /* storage optional */ }
     const full = () => setExpanded(Boolean(document.fullscreenElement));
     document.addEventListener("fullscreenchange", full);
     const hidden = () => { if (document.hidden) { clearDriveInput(); useSimulator.getState().pause(); } };

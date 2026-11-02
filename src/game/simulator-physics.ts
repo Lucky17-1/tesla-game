@@ -1,23 +1,35 @@
 import * as CANNON from "cannon-es";
 
-export const TRACK = { centerX: -110, radiusX: 110, radiusZ: 170, halfWidth: 7 };
+/** Straight drag-race strip running along -Z; distance along the strip is `s = -z`. */
+export const TRACK = { halfWidth: 9, start: -150, end: 1600 };
+export const RACE = { length: 1200 };
 export const CAR = { mass: 1350, engineForce: 4700, brakeForce: 65, topSpeed: 58 };
 export interface DrivingInput { throttle: boolean; brake: boolean; steer: number; handbrake: boolean; drift: boolean }
 
-export function trackPoint(t: number, lane = 0) {
-  const x = TRACK.centerX + TRACK.radiusX * Math.cos(t);
-  const z = TRACK.radiusZ * Math.sin(t);
-  const nx = Math.cos(t) * TRACK.radiusZ;
-  const nz = Math.sin(t) * TRACK.radiusX;
-  const len = Math.hypot(nx, nz);
-  return { x: x + nx / len * lane, z: z + nz / len * lane, yaw: Math.atan2(-TRACK.radiusX * Math.sin(t), TRACK.radiusZ * Math.cos(t)) };
+/** Rival grid: lane x, grid offset (positive = behind the start line), acceleration and top speed in m/s. */
+export const RIVALS = [
+  { lane: -6.75, grid: 0, accel: 7.2, top: 47 },
+  { lane: -2.25, grid: 0, accel: 7.8, top: 51 },
+  { lane: 6.75, grid: 0, accel: 6.6, top: 44 },
+  { lane: 2.25, grid: 12, accel: 8.2, top: 53 },
+] as const;
+
+/** Distance a rival has covered along the strip after `seconds`; rivals coast to a stop after the finish. */
+export function rivalDistance(index: number, seconds: number) {
+  const r = RIVALS[index]; if (!r) return 0;
+  const t = Math.max(0, seconds); const tTop = r.top / r.accel;
+  const s = t < tTop ? 0.5 * r.accel * t * t : 0.5 * r.top * tTop + r.top * (t - tTop);
+  return Math.min(s, RACE.length + 90) - r.grid;
 }
 
-export function roadOffset(x: number, z: number) {
-  const t = Math.atan2(z / TRACK.radiusZ, (x - TRACK.centerX) / TRACK.radiusX);
-  const center = trackPoint(t);
-  return Math.hypot(x - center.x, z - center.z);
+/** Race rank: 1 + rivals ahead of the player's distance. */
+export function raceRank(playerDistance: number, rivalDistances: number[]) {
+  return 1 + rivalDistances.filter((d) => d > playerDistance).length;
 }
+
+export function trackPoint(s: number, lane = 0) { return { x: lane, z: -s, yaw: 0 }; }
+
+export function roadOffset(x: number, _z: number) { return Math.abs(x); }
 
 /** Cannon's suspension, wheel contact, impulses and collision drive the vehicle. */
 export function makeDrivingPhysics() {
@@ -85,8 +97,8 @@ export function makeDrivingPhysics() {
     const slip = speed > 2 ? Math.atan2(lateral, Math.abs(longitudinal)) : 0;
     distance += speed * dt;
     if (speed > 6 && Math.abs(slip) > 0.09 && Math.abs(slip) < 1.4 && !offroad) driftScore += Math.abs(slip) * speed * dt * 18;
-    if (body.position.y < -5 || Math.abs(body.position.x) > 600 || Math.abs(body.position.z) > 600) reset();
-    return { speed, distance, driftScore, slip, steering, offroad, yaw: Math.atan2(-forward.x, -forward.z) };
+    if (body.position.y < -5 || Math.abs(body.position.x) > 220 || body.position.z < -(TRACK.end + 150) || body.position.z > 220) reset();
+    return { speed, distance, progress: -body.position.z, driftScore, slip, steering, offroad, yaw: Math.atan2(-forward.x, -forward.z) };
   }
   return { world, body, vehicle, traffic, step, reset };
 }

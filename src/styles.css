@@ -105,22 +105,33 @@
   --vehicle-line: #e2e2d7;
   --vehicle-skin: #b98563;
   --vehicle-screen: #060808;
-  --sim-sky: #c8dde1;
-  --sim-fog: #c8dde1;
-  --sim-ground: #5a7050;
-  --sim-asphalt: #45494a;
-  --sim-line: #eee8ce;
-  --sim-grain: #92938c;
+  --sim-sky: #f3c58f;
+  --sim-fog: #eec393;
+  --sim-ground: #5f7a3c;
+  --sim-asphalt: #3d4042;
+  --sim-line: #f4ecd2;
+  --sim-grain: #8e8a76;
   --sim-paint: #181c1e;
   --sim-carens: #1f3f9e;
   --sim-glass: #52686b;
-  --sim-trim: #202628;
+  --sim-trim: #1e2224;
   --sim-seat: #dfe4de;
   --sim-metal: #8d989c;
-  --sim-light: #f4f7ef;
-  --sim-tail: #ed3c37;
-  --sim-skin: #b48260;
-  --sim-hill: #6f8369;
+  --sim-light: #fbf6ea;
+  --sim-tail: #e2412c;
+  --sim-skin: #b8835f;
+  --sim-hill: #4f6b3a;
+  --sim-sand: #d9bf8a;
+  --sim-water: #2f8fa8;
+  --sim-wood: #7a5a3a;
+  --sim-container1: #c4552d;
+  --sim-container2: #e0a72e;
+  --sim-container3: #3f6b78;
+  --sim-hair: #1b1512;
+  --sim-shirt1: #24282c;
+  --sim-shirt2: #c9506a;
+  --sim-shirt3: #2b3a55;
+  --sim-pants: #2f3542;
 }
 
 .simulator { position: relative; width: 100%; height: calc(100svh - 76px); min-height: 610px; overflow: hidden; background: var(--sim-sky); touch-action: none; isolation: isolate; }

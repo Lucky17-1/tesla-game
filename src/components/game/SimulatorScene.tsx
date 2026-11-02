@@ -2,13 +2,13 @@ import { Suspense, useEffect, useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import { Environment, Lightformer } from "@react-three/drei";
 import * as THREE from "three";
-import { makeDrivingPhysics, trackPoint, type DrivingInput } from "@/game/simulator-physics";
+import { makeDrivingPhysics, raceRank, rivalDistance, trackPoint, RACE, RIVALS, type DrivingInput } from "@/game/simulator-physics";
 import { CAMERA_VIEWS, clearDriveInput, driveInput, useSimulator, type CameraView } from "@/game/simulator-store";
 import { cameraLook, isInteriorCamera, isPortraitBlinking } from "@/game/simulator-vehicles";
 import { readDrivingInput } from "@/game/simulator-input";
 import type { SimulatorTheme } from "@/game/simulator-theme";
 import { audio } from "@/game/audio";
-import { SimulatorWorld, Woodland } from "./SimulatorWorld";
+import { SimulatorWorld, Woodland, BattleIsland } from "./SimulatorWorld";
 import { PersonalizedVehicle, Sedan } from "./SimulatorCar";
 
 type DebugGame = { readonly state: Record<string, unknown>; input: typeof driveInput; sim: (seconds: number) => void; camera: (view: CameraView) => void; start: () => void; restart: () => void; pause: () => void };
@@ -27,22 +27,29 @@ export function SimulatorScene({ theme, music, muted, active, onReady }: { theme
   const readyVehicle = useRef<string | null>(null);
   const cameraState = useRef("");
   const temp = useMemo(() => ({ position: new THREE.Vector3(), target: new THREE.Vector3(), offset: new THREE.Vector3(), look: new THREE.Vector3(), quaternion: new THREE.Quaternion() }), []);
-  const telemetry = useRef({ speed: 0, distance: 0, driftScore: 0, slip: 0, steering: 0, offroad: false, yaw: 0 });
+  const telemetry = useRef({ speed: 0, distance: 0, progress: 0, driftScore: 0, slip: 0, steering: 0, offroad: false, yaw: 0 });
+  const rank = useRef(5);
 
   function publish() {
     const r = telemetry.current;
-    useSimulator.getState().telemetry({ speed: Math.round(r.speed * 3.6), distance: r.distance, driftScore: Math.floor(r.driftScore), slip: r.slip, steering: r.steering, heading: r.yaw, offroad: r.offroad, impact: impactTime.current > 0 });
+    useSimulator.getState().telemetry({ speed: Math.round(r.speed * 3.6), distance: r.distance, driftScore: Math.floor(r.driftScore), slip: r.slip, steering: r.steering, heading: r.yaw, offroad: r.offroad, impact: impactTime.current > 0, rank: rank.current, raceTime: time.current, progress: Math.max(0, r.progress) });
   }
   function advance(dt: number, input: DrivingInput) {
     const state = useSimulator.getState();
     if (lastRun.current !== state.runId) { physics.reset(); time.current = 0; lastRun.current = state.runId; impactTime.current = 0; }
     time.current += dt; impactTime.current = Math.max(0, impactTime.current - dt);
+    placeRivals(time.current);
+    telemetry.current = physics.step(input, dt);
+    rank.current = raceRank(telemetry.current.progress, RIVALS.map((_, i) => rivalDistance(i, time.current)));
+    if (telemetry.current.progress >= RACE.length && state.state === "driving") { publish(); useSimulator.getState().finish(time.current, rank.current); }
+  }
+  function placeRivals(seconds: number) {
     physics.traffic.forEach((body, i) => {
-      const t = -0.48 - i * 1.38 - time.current * 0.075; const p = trackPoint(t, -2.7);
-      body.position.set(p.x, 0.8, p.z); body.quaternion.setFromEuler(0, p.yaw + Math.PI, 0); body.aabbNeedsUpdate = true;
+      const rival = RIVALS[i]; if (!rival) return;
+      const p = trackPoint(rivalDistance(i, seconds), rival.lane);
+      body.position.set(p.x, 0.8, p.z); body.quaternion.setFromEuler(0, 0, 0); body.aabbNeedsUpdate = true;
       body.velocity.set(0, 0, 0);
     });
-    telemetry.current = physics.step(input, dt);
   }
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLSelectElement) return; if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Space"].includes(e.code)) e.preventDefault(); keys.current.add(e.code); };
@@ -68,10 +75,10 @@ export function SimulatorScene({ theme, music, muted, active, onReady }: { theme
     if (!active) return;
     const dt = Math.min(raw, 0.05); const state = useSimulator.getState(); const input = readDrivingInput(keys.current, driveInput, state.mode === "Drift");
     if (state.state === "driving") { advance(dt, input); audio.updateEngine(telemetry.current.speed, input.throttle); hud.current += dt; if (hud.current >= 0.12) { hud.current = 0; publish(); } }
-    else if (state.state === "ready") { physics.step({ throttle: false, brake: true, steer: 0, handbrake: false, drift: false }, dt); }
+    else if (state.state === "ready" || state.state === "finished") { if (state.state === "ready" && lastRun.current !== state.runId) { physics.reset(); time.current = 0; lastRun.current = state.runId; } if (state.state === "ready") placeRivals(0); else { time.current += dt; placeRivals(time.current); } physics.step({ throttle: false, brake: true, steer: 0, handbrake: false, drift: false }, dt); }
     const b = physics.body;
     const blink = isPortraitBlinking(time.current);
-    for (const name of ["driver", "rear"]) { const eyes = vehicleModel.current?.getObjectByName(`portrait-blink-${name}`); if (eyes) eyes.visible = blink; }
+    for (const name of ["driver", "passenger", "rear"]) { const eyes = vehicleModel.current?.getObjectByName(`portrait-blink-${name}`); if (eyes) eyes.visible = blink; }
     if (player.current) { player.current.position.set(b.position.x, b.position.y - 0.58, b.position.z); player.current.quaternion.set(b.quaternion.x, b.quaternion.y, b.quaternion.z, b.quaternion.w); }
     physics.traffic.forEach((body, i) => { const group = cars.current[i]; if (!group) return; group.position.set(body.position.x, 0, body.position.z); group.quaternion.set(body.quaternion.x, body.quaternion.y, body.quaternion.z, body.quaternion.w); });
     temp.position.set(b.position.x, b.position.y - 0.58, b.position.z); temp.quaternion.set(b.quaternion.x, b.quaternion.y, b.quaternion.z, b.quaternion.w);
@@ -93,11 +100,12 @@ export function SimulatorScene({ theme, music, muted, active, onReady }: { theme
     if (vehicleModel.current?.children.length && (!ready.current || readyVehicle.current !== state.vehicle)) { ready.current = true; readyVehicle.current = state.vehicle; requestAnimationFrame(() => { gl.domElement.closest(".simulator")?.setAttribute("data-scene-ready", state.vehicle); onReady(); }); }
   });
   return <>
-    <color attach="background" args={[theme.sky]} /><fog attach="fog" args={[theme.fog, 70, 310]} />
+    <color attach="background" args={[theme.sky]} /><fog attach="fog" args={[theme.fog, 90, 520]} />
     <hemisphereLight args={[theme.light, theme.ground, 1.5]} />
     <directionalLight position={[35, 60, -30]} intensity={2.6} castShadow shadow-mapSize-width={1024} shadow-mapSize-height={1024} shadow-camera-left={-25} shadow-camera-right={25} shadow-camera-top={25} shadow-camera-bottom={-25} shadow-bias={-0.0003} />
     <Environment resolution={64}><Lightformer intensity={3} position={[0, 12, 0]} rotation-x={-Math.PI / 2} scale={[25, 25, 1]} color={theme.light} /><Lightformer intensity={2} position={[15, 5, 0]} rotation-y={Math.PI / 2} scale={[25, 6, 1]} color={theme.sky} /></Environment>
     <SimulatorWorld theme={theme} />
+    <BattleIsland theme={theme} />
     <Suspense fallback={null}><Woodland theme={theme} /></Suspense>
     <group ref={player}><Suspense fallback={null}><group key={vehicle} ref={vehicleModel}><PersonalizedVehicle theme={theme} vehicle={vehicle} cabin={isInteriorCamera(cameraView)} driverView={cameraView === "Driver"} music={music} muted={muted} active={active} /></group></Suspense></group>
     <Suspense fallback={null}>
