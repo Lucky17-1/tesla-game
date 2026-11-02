@@ -4,7 +4,7 @@ import { resetCameraLook, type VehicleId } from "./simulator-vehicles";
 export const CAMERA_VIEWS = ["Chase", "Driver", "Cabin", "Rear seat", "Hood", "Aerial", "Front", "Orbit 360"] as const;
 export type CameraView = typeof CAMERA_VIEWS[number];
 export type DriveMode = "Touring" | "Drift";
-export type SimulatorState = "ready" | "driving" | "paused";
+export type SimulatorState = "ready" | "driving" | "paused" | "finished";
 
 interface SimulatorStore {
   state: SimulatorState;
@@ -20,7 +20,14 @@ interface SimulatorStore {
   heading: number;
   offroad: boolean;
   impact: boolean;
+  rank: number;
+  raceTime: number;
+  progress: number;
+  finishTime: number;
+  finishRank: number;
+  bestTime: number;
   best: number;
+  finish: (time: number, rank: number) => void;
   start: () => void;
   restart: () => void;
   pause: () => void;
@@ -29,15 +36,22 @@ interface SimulatorStore {
   setCamera: (camera: CameraView) => void;
   setMode: (mode: DriveMode) => void;
   setVehicle: (vehicle: VehicleId) => void;
-  telemetry: (data: Pick<SimulatorStore, "speed" | "distance" | "driftScore" | "slip" | "steering" | "heading" | "offroad" | "impact">) => void;
+  telemetry: (data: Pick<SimulatorStore, "speed" | "distance" | "driftScore" | "slip" | "steering" | "heading" | "offroad" | "impact" | "rank" | "raceTime" | "progress">) => void;
 }
 
 export const useSimulator = create<SimulatorStore>((set, get) => ({
   state: "ready", camera: "Chase", mode: "Touring", vehicle: "mpv", runId: 0,
   speed: 0, distance: 0, driftScore: 0, slip: 0, steering: 0, heading: 0,
   offroad: false, impact: false, best: 0,
+  rank: 5, raceTime: 0, progress: 0, finishTime: 0, finishRank: 0, bestTime: 0,
+  finish: (time, rank) => {
+    const s = get(); if (s.state !== "driving") return;
+    const bestTime = s.bestTime > 0 ? Math.min(s.bestTime, time) : time;
+    try { localStorage.setItem("deshmukh-race-best", String(bestTime)); } catch { /* storage optional */ }
+    set({ state: "finished", finishTime: time, finishRank: rank, bestTime });
+  },
   start: () => set({ state: "driving" }),
-  restart: () => set((s) => ({ state: "driving", runId: s.runId + 1, speed: 0, distance: 0, driftScore: 0, slip: 0, offroad: false, impact: false })),
+  restart: () => set((s) => ({ state: "driving", runId: s.runId + 1, speed: 0, distance: 0, driftScore: 0, slip: 0, offroad: false, impact: false, rank: 5, raceTime: 0, progress: 0, finishTime: 0, finishRank: 0 })),
   pause: () => {
     const s = get();
     if (s.state !== "driving") return;
@@ -49,7 +63,7 @@ export const useSimulator = create<SimulatorStore>((set, get) => ({
   nextCamera: () => { resetCameraLook(); set((s) => ({ camera: CAMERA_VIEWS[(CAMERA_VIEWS.indexOf(s.camera) + 1) % CAMERA_VIEWS.length] ?? "Chase" })); },
   setCamera: (camera) => { resetCameraLook(); set({ camera }); },
   setMode: (mode) => set({ mode }),
-  setVehicle: (vehicle) => { resetCameraLook(); set((s) => ({ vehicle, runId: s.runId + 1, speed: 0, distance: 0, driftScore: 0, impact: false, offroad: false, steering: 0, heading: 0 })); },
+  setVehicle: (vehicle) => { resetCameraLook(); set((s) => ({ vehicle, runId: s.runId + 1, speed: 0, distance: 0, driftScore: 0, impact: false, offroad: false, steering: 0, heading: 0, rank: 5, raceTime: 0, progress: 0, finishTime: 0, finishRank: 0, state: s.state === "finished" ? "ready" : s.state })); },
   telemetry: (data) => set(data),
 }));
 
