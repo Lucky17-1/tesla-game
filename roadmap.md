@@ -1,5 +1,13 @@
 # Roadmap — VoltEdge (EV news site + racing game)
 
+## Current request — Zypo
+- [ ] Add uploaded glowing Z emblem and Zypo link to the homepage; set matching favicon.
+- [ ] Build real social accounts, profiles, posts, stories/reels, likes/comments/saves, follows, notifications and private messaging.
+- [ ] Add home-screen installation for Zypo.
+- [ ] Remove public Owner labels, keep private access protected and expand real management statistics.
+- [ ] Replace the private access password through the secure form; verify access and key social flows.
+- [ ] Run relevant tests and inspect desktop/mobile layouts.
+
 ## Current request — Maps, vehicle exchange and 360 cabin
 - [x] Resume the interrupted October 29 work and resolve the incomplete camera integration.
 - [x] Connect Google Maps and add a separate map/360 Street View starting at the supplied panorama and coordinates; localhost makes no Maps requests.
