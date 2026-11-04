@@ -205,6 +205,8 @@ export type Database = {
           body: string
           created_at: string
           id: string
+          media_path: string | null
+          media_type: string | null
           recipient_id: string
           sender_id: string
         }
@@ -212,6 +214,8 @@ export type Database = {
           body: string
           created_at?: string
           id?: string
+          media_path?: string | null
+          media_type?: string | null
           recipient_id: string
           sender_id: string
         }
@@ -219,6 +223,8 @@ export type Database = {
           body?: string
           created_at?: string
           id?: string
+          media_path?: string | null
+          media_type?: string | null
           recipient_id?: string
           sender_id?: string
         }

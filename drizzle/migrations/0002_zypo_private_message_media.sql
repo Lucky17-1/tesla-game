@@ -1,0 +1,4 @@
+ALTER TABLE public.zypo_messages ADD COLUMN media_path text, ADD COLUMN media_type text;
+ALTER TABLE public.zypo_messages ADD CONSTRAINT zypo_message_media_pair CHECK ((media_path IS NULL AND media_type IS NULL) OR (media_path IS NOT NULL AND media_type IN ('image','video') AND media_path LIKE sender_id::text || '/%'));
+CREATE POLICY "Read conversation attachments" ON storage.objects FOR SELECT TO authenticated USING (bucket_id='zypo-media' AND EXISTS (SELECT 1 FROM public.zypo_messages m WHERE m.media_path=objects.name AND auth.uid() IN (m.sender_id,m.recipient_id)));
+CREATE INDEX zypo_messages_sender ON public.zypo_messages(sender_id, created_at DESC);
