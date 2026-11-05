@@ -10,7 +10,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 
-const feedQuery = queryOptions({ queryKey: ['zypo-feed'], queryFn: () => getZypoFeed({ data: {} }) });
+const feedQuery = queryOptions({ queryKey: ['zypo-feed'], queryFn: async () => {
+  try { return await getZypoFeed({ data: {} }); }
+  catch { return { posts: [], profiles: [], likes: [], comments: [], follows: [], media: {} } as Awaited<ReturnType<typeof getZypoFeed>>; }
+} });
 
 export const Route = createFileRoute('/zypo')({
   head: () => ({
