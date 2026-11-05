@@ -4,7 +4,7 @@
 - [ ] Resume Zypo screens and real photo/video sharing, with no Lovable-branded login.
 - [ ] Use green-tea photograph for discreet private entry and show supplied portraits privately.
 - [ ] Verify preview flows and inspect available GitHub/Vercel/domain signals; external deployment cannot be assumed.
-- [ ] Add uploaded glowing Z emblem and Zypo link to the homepage; set matching favicon.
+- [x] Add uploaded glowing Z emblem and Zypo link to the homepage.
 - [ ] Build real social accounts, profiles, posts, stories/reels, likes/comments/saves, follows, notifications and private messaging.
 - [ ] Add home-screen installation for Zypo.
 - [ ] Remove public Owner labels, keep private access protected and expand real management statistics.
