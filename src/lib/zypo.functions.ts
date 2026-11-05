@@ -6,8 +6,9 @@ import type { Database } from '@/integrations/supabase/types';
 export const getZypoFeed = createServerFn({ method: 'GET' })
   .inputValidator((input: unknown) => z.object({ username: z.string().max(30).optional() }).parse(input ?? {}))
   .handler(async ({ data: input }) => {
-    const url = process.env['SUPABASE_URL'];
-    const key = process.env['SUPABASE_PUBLISHABLE_KEY'];
+    // Hosts like Vercel may only provide the public VITE_* values; fall back to them.
+    const url = process.env['SUPABASE_URL'] || (import.meta.env['VITE_SUPABASE_URL'] as string | undefined);
+    const key = process.env['SUPABASE_PUBLISHABLE_KEY'] || (import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY'] as string | undefined);
     if (!url || !key) throw new Error('Zypo is unavailable. Please try again.');
     const db = createClient<Database>(url, key, {
       auth: { persistSession: false, autoRefreshToken: false },
