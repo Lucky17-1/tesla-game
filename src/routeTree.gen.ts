@@ -17,6 +17,7 @@ import { Route as GameRouteImport } from './routes/game'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as ZypoRouteImport } from './routes/zypo'
 import { Route as CarsIndexRouteImport } from './routes/cars.index'
 import { Route as CarsVolterraGtOneRouteImport } from './routes/cars.volterra-gt-one'
 import { Route as NewsIndexRouteImport } from './routes/news.index'
@@ -64,6 +65,11 @@ const TermsRoute = TermsRouteImport.update({
   path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ZypoRoute = ZypoRouteImport.update({
+  id: '/zypo',
+  path: '/zypo',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CarsIndexRoute = CarsIndexRouteImport.update({
   id: '/cars/',
   path: '/cars/',
@@ -104,6 +110,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/terms': typeof TermsRoute
+  '/zypo': typeof ZypoRoute
   '/cars/volterra-gt-one': typeof CarsVolterraGtOneRoute
   '/news/$slug': typeof NewsSlugRoute
   '/owner/login': typeof OwnerLoginRoute
@@ -120,6 +127,7 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/terms': typeof TermsRoute
+  '/zypo': typeof ZypoRoute
   '/cars/volterra-gt-one': typeof CarsVolterraGtOneRoute
   '/news/$slug': typeof NewsSlugRoute
   '/owner/login': typeof OwnerLoginRoute
@@ -137,6 +145,7 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/terms': typeof TermsRoute
+  '/zypo': typeof ZypoRoute
   '/cars/volterra-gt-one': typeof CarsVolterraGtOneRoute
   '/news/$slug': typeof NewsSlugRoute
   '/owner/login': typeof OwnerLoginRoute
@@ -155,6 +164,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/reset-password'
     | '/terms'
+    | '/zypo'
     | '/cars/volterra-gt-one'
     | '/news/$slug'
     | '/owner/login'
@@ -171,6 +181,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/reset-password'
     | '/terms'
+    | '/zypo'
     | '/cars/volterra-gt-one'
     | '/news/$slug'
     | '/owner/login'
@@ -187,6 +198,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/reset-password'
     | '/terms'
+    | '/zypo'
     | '/cars/volterra-gt-one'
     | '/news/$slug'
     | '/owner/login'
@@ -204,6 +216,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   TermsRoute: typeof TermsRoute
+  ZypoRoute: typeof ZypoRoute
   CarsVolterraGtOneRoute: typeof CarsVolterraGtOneRoute
   NewsSlugRoute: typeof NewsSlugRoute
   OwnerLoginRoute: typeof OwnerLoginRoute
@@ -270,6 +283,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/zypo': {
+      id: '/zypo'
+      path: '/zypo'
+      fullPath: '/zypo'
+      preLoaderRoute: typeof ZypoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/cars/': {
       id: '/cars/'
       path: '/cars'
@@ -324,6 +344,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   TermsRoute: TermsRoute,
+  ZypoRoute: ZypoRoute,
   CarsVolterraGtOneRoute: CarsVolterraGtOneRoute,
   NewsSlugRoute: NewsSlugRoute,
   OwnerLoginRoute: OwnerLoginRoute,

@@ -35,7 +35,7 @@ export const getZypoFeed = createServerFn({ method: 'GET' })
     const paths = [...new Set([...rows.map(p => p.media_path), ...(profiles ?? []).map(p => p.avatar_path).filter((p): p is string => !!p)])];
     const signed = paths.length ? await db.storage.from('zypo-media').createSignedUrls(paths, 3600) : { data: [] };
     const media: Record<string, string> = {};
-    const browserUrl = import.meta.env.VITE_SUPABASE_URL;
+    const browserUrl = import.meta.env['VITE_SUPABASE_URL'] as string | undefined;
     for (const item of signed.data ?? []) if (item.path && item.signedUrl) media[item.path] = browserUrl ? item.signedUrl.replace(url, browserUrl) : item.signedUrl;
     return { posts: rows, profiles: profiles ?? [], likes: likes.data ?? [], comments: comments.data ?? [], follows: follows.data ?? [], media };
   });
