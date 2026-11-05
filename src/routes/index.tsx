@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { HomeMediaGallery } from "@/components/HomeMediaGallery";
+import { ZypoBrand } from "@/components/ZypoBrand";
 import { articles } from "@/data/articles";
 import { ArticleCard } from "@/components/ArticleCard";
 import { CONCEPT_CAR } from "@/data/car";
@@ -42,6 +43,7 @@ function HomePage() {
 
   return (
     <main>
+      <div className="flex justify-center py-6"><ZypoBrand large /></div>
       {/* Hero */}
       <section className="relative isolate overflow-hidden">
         <img
