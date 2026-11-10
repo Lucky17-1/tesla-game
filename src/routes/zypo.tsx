@@ -71,7 +71,7 @@ function AuthBox() {
       <Input type="email" required placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} />
       <Input type="password" required minLength={6} placeholder="Password" value={pw} onChange={e => setPw(e.target.value)} />
       <Button type="submit" className="w-full" disabled={busy}>{mode === 'in' ? 'Log in' : 'Sign up'}</Button>
-      <Button type="button" variant="outline" className="w-full" onClick={() => lovable.auth.signInWithOAuth('google', { redirect_uri: `${window.location.origin}/zypo` })}>Continue with Google</Button>
+      <Button type="button" variant="outline" className="w-full" onClick={async () => { const r = await lovable.auth.signInWithOAuth('google', { redirect_uri: `${window.location.origin}/zypo` }); if (r.error) setMsg('Google login failed. Please try again.'); }}>Continue with Google</Button>
       {msg && <p className="text-sm text-muted-foreground">{msg}</p>}
       <button type="button" className="text-sm text-primary underline" onClick={() => setMode(mode === 'in' ? 'up' : 'in')}>
         {mode === 'in' ? 'New here? Sign up' : 'Have an account? Log in'}
