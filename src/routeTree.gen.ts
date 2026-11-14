@@ -24,6 +24,7 @@ import { Route as NewsIndexRouteImport } from './routes/news.index'
 import { Route as NewsSlugRouteImport } from './routes/news.$slug'
 import { Route as OwnerIndexRouteImport } from './routes/owner.index'
 import { Route as OwnerLoginRouteImport } from './routes/owner.login'
+import { Route as ZypoIndexRouteImport } from './routes/zypo.index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -100,6 +101,11 @@ const OwnerLoginRoute = OwnerLoginRouteImport.update({
   path: '/owner/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ZypoIndexRoute = ZypoIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ZypoRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -110,13 +116,14 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/terms': typeof TermsRoute
-  '/zypo': typeof ZypoRoute
+  '/zypo': typeof ZypoRouteWithChildren
   '/cars/volterra-gt-one': typeof CarsVolterraGtOneRoute
   '/news/$slug': typeof NewsSlugRoute
   '/owner/login': typeof OwnerLoginRoute
   '/cars/': typeof CarsIndexRoute
   '/news/': typeof NewsIndexRoute
   '/owner/': typeof OwnerIndexRoute
+  '/zypo/': typeof ZypoIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -127,13 +134,13 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/terms': typeof TermsRoute
-  '/zypo': typeof ZypoRoute
   '/cars/volterra-gt-one': typeof CarsVolterraGtOneRoute
   '/news/$slug': typeof NewsSlugRoute
   '/owner/login': typeof OwnerLoginRoute
   '/cars': typeof CarsIndexRoute
   '/news': typeof NewsIndexRoute
   '/owner': typeof OwnerIndexRoute
+  '/zypo': typeof ZypoIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -145,13 +152,14 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/terms': typeof TermsRoute
-  '/zypo': typeof ZypoRoute
+  '/zypo': typeof ZypoRouteWithChildren
   '/cars/volterra-gt-one': typeof CarsVolterraGtOneRoute
   '/news/$slug': typeof NewsSlugRoute
   '/owner/login': typeof OwnerLoginRoute
   '/cars/': typeof CarsIndexRoute
   '/news/': typeof NewsIndexRoute
   '/owner/': typeof OwnerIndexRoute
+  '/zypo/': typeof ZypoIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -171,6 +179,7 @@ export interface FileRouteTypes {
     | '/cars/'
     | '/news/'
     | '/owner/'
+    | '/zypo/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -181,13 +190,13 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/reset-password'
     | '/terms'
-    | '/zypo'
     | '/cars/volterra-gt-one'
     | '/news/$slug'
     | '/owner/login'
     | '/cars'
     | '/news'
     | '/owner'
+    | '/zypo'
   id:
     | '__root__'
     | '/'
@@ -205,6 +214,7 @@ export interface FileRouteTypes {
     | '/cars/'
     | '/news/'
     | '/owner/'
+    | '/zypo/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -216,7 +226,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   TermsRoute: typeof TermsRoute
-  ZypoRoute: typeof ZypoRoute
+  ZypoRoute: typeof ZypoRouteWithChildren
   CarsVolterraGtOneRoute: typeof CarsVolterraGtOneRoute
   NewsSlugRoute: typeof NewsSlugRoute
   OwnerLoginRoute: typeof OwnerLoginRoute
@@ -332,8 +342,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OwnerLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/zypo/': {
+      id: '/zypo/'
+      path: '/'
+      fullPath: '/zypo/'
+      preLoaderRoute: typeof ZypoIndexRouteImport
+      parentRoute: typeof ZypoRoute
+    }
   }
 }
+
+interface ZypoRouteChildren {
+  ZypoIndexRoute: typeof ZypoIndexRoute
+}
+
+const ZypoRouteChildren: ZypoRouteChildren = {
+  ZypoIndexRoute: ZypoIndexRoute,
+}
+
+const ZypoRouteWithChildren = ZypoRoute._addFileChildren(ZypoRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -344,7 +371,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   TermsRoute: TermsRoute,
-  ZypoRoute: ZypoRoute,
+  ZypoRoute: ZypoRouteWithChildren,
   CarsVolterraGtOneRoute: CarsVolterraGtOneRoute,
   NewsSlugRoute: NewsSlugRoute,
   OwnerLoginRoute: OwnerLoginRoute,

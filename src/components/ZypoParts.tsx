@@ -11,11 +11,11 @@ import { commentSchema, mediaError, postSchema } from '@/lib/zypo-rules';
 import type { ZypoFeed, ZypoPost, ZypoProfile } from '@/lib/zypo.functions';
 import { useZypoSession } from '@/components/ZypoSession';
 
-export function profileOf(feed: ZypoFeed, id: string) {
+export function profileOf(feed: ZypoFeed, id: string | undefined) {
   return feed.profiles.find(p => p.id === id);
 }
 
-export function ZypoAvatar({ profile, media, size = 36 }: { profile?: ZypoProfile; media: Record<string, string>; size?: number }) {
+export function ZypoAvatar({ profile, media, size = 36 }: { profile?: ZypoProfile | undefined; media: Record<string, string>; size?: number | undefined }) {
   const src = profile?.avatar_path ? media[profile.avatar_path] : undefined;
   if (src) return <img src={src} alt="" width={size} height={size} className="rounded-full object-cover" style={{ width: size, height: size }} />;
   return (
@@ -29,16 +29,26 @@ export function ZypoAvatar({ profile, media, size = 36 }: { profile?: ZypoProfil
   );
 }
 
-export function ZypoMedia({ post, media, className = 'w-full' }: { post: ZypoPost; media: Record<string, string>; className?: string }) {
+export function ZypoMedia({ post, media, className = 'w-full' }: { post: ZypoPost; media: Record<string, string>; className?: string | undefined }) {
   const src = media[post.media_path];
   if (!src) return <div className={`${className} aspect-square bg-muted`} />;
   if (post.media_type === 'video') {
-    return <video src={src} controls playsInline muted={post.kind === 'reel'} className={`${className} bg-black`} style={post.kind === 'reel' ? { maxHeight: '78vh', objectFit: 'contain' } : undefined} />;
+    return (
+      <video
+        src={src}
+        controls
+        playsInline
+        muted={post.kind === 'reel'}
+        loop={post.kind === 'reel'}
+        className={`${className} bg-black`}
+        style={post.kind === 'reel' ? { maxHeight: '78vh', objectFit: 'contain' } : undefined}
+      />
+    );
   }
   return <img src={src} alt={post.caption || 'Zypo post'} className={`${className} object-cover`} loading="lazy" />;
 }
 
-export function ZypoComposer({ userId, kind = 'post' }: { userId: string; kind?: 'post' | 'story' | 'reel' }) {
+export function ZypoComposer({ userId, kind = 'post' }: { userId: string; kind?: 'post' | 'story' | 'reel' | undefined }) {
   const qc = useQueryClient();
   const [file, setFile] = useState<File | null>(null);
   const [caption, setCaption] = useState('');
@@ -144,16 +154,20 @@ export function ZypoPostCard({ post, feed }: { post: ZypoPost; feed: ZypoFeed })
   );
 }
 
-export function ZypoStoryBar({ feed, onOpen }: { feed: ZypoFeed; onOpen: (index: number) => void }) {
-  const { user } = useZypoSession();
-  if (!feed.stories.length) return null;
+export function storyGroups(feed: ZypoFeed) {
   const byUser = new Map<string, ZypoPost[]>();
   for (const story of feed.stories) {
     const list = byUser.get(story.user_id) ?? [];
     list.push(story);
     byUser.set(story.user_id, list);
   }
-  const groups = [...byUser.entries()];
+  return [...byUser.entries()];
+}
+
+export function ZypoStoryBar({ feed, onOpen }: { feed: ZypoFeed; onOpen: (index: number) => void }) {
+  const { user } = useZypoSession();
+  const groups = storyGroups(feed);
+  if (!groups.length) return null;
   return (
     <div className="flex gap-4 overflow-x-auto pb-2">
       {groups.map(([id, items], groupIndex) => {
@@ -161,10 +175,12 @@ export function ZypoStoryBar({ feed, onOpen }: { feed: ZypoFeed; onOpen: (index:
         const isMine = user?.id === id;
         return (
           <button key={id} onClick={() => onOpen(groupIndex)} className="flex w-16 shrink-0 flex-col items-center gap-1">
-            <span className={`rounded-full p-0.5 ${isMine ? 'ring-2 ring-primary' : 'ring-2 ring-primary/40'}`}>
+            <span className={`rounded-full p-0.5 ring-2 ${isMine ? 'ring-primary' : 'ring-primary/40'}`}>
               <ZypoAvatar profile={profile} media={feed.media} size={56} />
             </span>
-            <span className="w-full truncate text-center text-xs text-muted-foreground">{isMine ? 'You' : `@${profile?.username ?? 'user'}`}</span>
+            <span className="w-full truncate text-center text-xs text-muted-foreground">
+              {isMine ? 'You' : `@${profile?.username ?? 'user'}`} · {items.length}
+            </span>
           </button>
         );
       })}
@@ -174,36 +190,34 @@ export function ZypoStoryBar({ feed, onOpen }: { feed: ZypoFeed; onOpen: (index:
 
 export function ZypoStoryViewer({ feed, groupIndex, onClose }: { feed: ZypoFeed; groupIndex: number; onClose: () => void }) {
   const [index, setIndex] = useState(0);
-  const byUser = new Map<string, ZypoPost[]>();
-  for (const story of feed.stories) {
-    const list = byUser.get(story.user_id) ?? [];
-    list.push(story);
-    byUser.set(story.user_id, list);
-  }
-  const groups = [...byUser.entries()];
-  const [authorId, items] = groups[groupIndex] ?? groups[0] ?? [];
-  const story = items?.[index];
-  const author = authorId ? profileOf(feed, authorId) : undefined;
+  const groups = storyGroups(feed);
+  const group = groups[groupIndex] ?? groups[0];
+  const authorId = group?.[0];
+  const items = group?.[1] ?? [];
+  const story = items[index];
+  const author = profileOf(feed, authorId);
 
   useEffect(() => {
-    function onKey(e: KeyboardEvent) { if (e.key === 'Escape') onClose(); }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') onClose();
+    }
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
 
-  useEffect(() => {
-    if (!story || story.media_type === 'video') return;
-    const timer = window.setTimeout(() => setIndex(i => i + 1), 5000);
-    return () => window.clearTimeout(timer);
-  }, [story]);
-
-  if (!story) return null;
-
   function advance() {
-    if (index + 1 < (items?.length ?? 0)) setIndex(index + 1);
-    else if (groupIndex + 1 < groups.length) { setIndex(0); onClose(); }
+    if (index + 1 < items.length) setIndex(index + 1);
     else onClose();
   }
+
+  useEffect(() => {
+    if (!story || story.media_type === 'video') return;
+    const timer = window.setTimeout(advance, 5000);
+    return () => window.clearTimeout(timer);
+  });
+
+  if (!story) return null;
+  const src = feed.media[story.media_path];
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-black/95">
@@ -213,24 +227,21 @@ export function ZypoStoryViewer({ feed, groupIndex, onClose }: { feed: ZypoFeed;
         <button onClick={onClose} aria-label="Close story" className="ml-auto rounded-full p-2 hover:bg-white/10"><X className="h-5 w-5" /></button>
       </div>
       <div className="flex gap-1 px-3">
-        {(items ?? []).map((_, i) => (
+        {items.map((_, i) => (
           <span key={i} className={`h-1 flex-1 rounded-full ${i <= index ? 'bg-white' : 'bg-white/30'}`} />
         ))}
       </div>
-      <div className="relative flex-1 overflow-hidden">
-        <ZypoMedia post={story} media={feed.media} className="h-full object-contain" />
-        {story.media_type === 'video' && (
-          <video
-            src={feed.media[story.media_path]}
-            autoPlay
-            playsInline
-            controls
-            onEnded={advance}
-            className="absolute inset-0 h-full w-full bg-black object-contain"
-          />
+      <div className="relative flex-1 overflow-hidden bg-black">
+        {story.media_type === 'video' ? (
+          <video src={src} autoPlay playsInline controls onEnded={advance} className="h-full w-full object-contain" />
+        ) : (
+          <img src={src} alt={story.caption || 'Zypo story'} className="h-full w-full object-contain" />
         )}
-        <button onClick={advance} aria-label="Next story" className="absolute inset-0 h-full w-full" />
+        {story.media_type !== 'video' && (
+          <button onClick={advance} aria-label="Next story" className="absolute inset-0 h-full w-full" />
+        )}
       </div>
+      {story.caption && <p className="p-3 text-center text-sm text-white">{story.caption}</p>}
     </div>
   );
 }
@@ -244,10 +255,9 @@ export function ZypoSaveButton({ post, saved }: { post: ZypoPost; saved: boolean
       aria-pressed={saved}
       aria-label={saved ? 'Remove from saved' : 'Save post'}
       onClick={async () => {
-        const next = !saved;
-        const result = next
-          ? await supabase.from('zypo_saves').insert({ user_id: user.id, post_id: post.id })
-          : await supabase.from('zypo_saves').delete().eq('user_id', user.id).eq('post_id', post.id);
+        const result = saved
+          ? await supabase.from('zypo_saves').delete().eq('user_id', user.id).eq('post_id', post.id)
+          : await supabase.from('zypo_saves').insert({ user_id: user.id, post_id: post.id });
         if (result.error) return;
         await qc.invalidateQueries({ queryKey: ['zypo-private'] });
       }}
@@ -258,7 +268,7 @@ export function ZypoSaveButton({ post, saved }: { post: ZypoPost; saved: boolean
   );
 }
 
-export function ZypoFollowButton({ me, targetId, following }: { me?: string; targetId: string; following: boolean }) {
+export function ZypoFollowButton({ me, targetId, following }: { me?: string | undefined; targetId: string; following: boolean }) {
   const qc = useQueryClient();
   if (!me || me === targetId) return null;
   return (
@@ -283,7 +293,7 @@ export function ZypoMessageButton({ targetId, username }: { targetId: string; us
   if (!user || user.id === targetId) return null;
   return (
     <Button size="sm" variant="ghost" asChild>
-      <Link to="/zypo/messages" search={{ peer: targetId }}>
+      <Link to="/zypo/chat/$peerId" params={{ peerId: targetId }}>
         <Send className="mr-1 h-4 w-4" /> Message @{username}
       </Link>
     </Button>
