@@ -22,6 +22,13 @@
       "when": 1793765598292,
       "tag": "0002_zypo_private_message_media",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1794676021313,
+      "tag": "0003_zypo_activity_alerts_and_story_cleanup",
+      "breakpoints": true
     }
   ]
 }
